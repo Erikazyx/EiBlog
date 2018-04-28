@@ -1,0 +1,14 @@
+.form_container{
+    width:300px;
+    margin: auto;
+}
+.register_title{
+    text-align: center;
+}
+.main{
+    background:whitesmoke;
+    width:630px;
+    margin: auto;
+    overflow: hidden;
+    padding: 10px;
+}
