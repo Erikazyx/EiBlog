@@ -1,9 +1,9 @@
-
 from exts import db
 from datetime import datetime
 
+
 class User(db.Model):
-    __tablename__='user'
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(50), nullable=False)
     username = db.Column(db.String(50), nullable=False)
@@ -12,8 +12,8 @@ class User(db.Model):
 
 
 class Article(db.Model):
-    __tablename__='article'
-    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
+    __tablename__ = 'article'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(50), nullable=False)
     content = db.Column(db.Text, nullable=False)
     create_time = db.Column(db.DateTime, default=datetime.now)
@@ -22,7 +22,7 @@ class Article(db.Model):
 
 
 class Comment(db.Model):
-    __tablename__='comment'
+    __tablename__ = 'comment'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     content = db.Column(db.Text, nullable=False)
     article_id = db.Column(db.Integer, db.ForeignKey('article.id'))

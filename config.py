@@ -7,7 +7,7 @@ SECRET_KEY = os.urandom(24)
 
 HOSTNAME = '127.0.0.1'
 PORT = '3306'
-DATABASE = 'eiblog'  # （要先生成一个叫这个名字的database）
+DATABASE = 'eiblog'    # （要先生成一个叫这个名字的database）
 USERNAME = 'root'
 PASSWORD = ''
 DB_URI = 'mysql+mysqldb://{}:{}@{}:{}/{}?charset=utf8'.format(USERNAME, PASSWORD, HOSTNAME, PORT, DATABASE)
