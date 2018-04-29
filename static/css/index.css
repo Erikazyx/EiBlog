@@ -1,6 +1,3 @@
-.ul{
-    list-style: none;
-}
 
 .article-group{
     width:800px;
@@ -9,7 +6,7 @@
 
 .article-title a{
     color: #995e4c;
-    font-weight:800;
+    font-weight:900;
 }
 
 .article-info{
@@ -20,8 +17,10 @@
     margin-right: 20px;
 }
 
-.ul li{
-    border-bottom: 1px ;
+.article-list li{
+    border-bottom: 1px solid ;
+    list-style: none;
+    border-bottom-color: gray;
 }
 
 .main{
@@ -30,5 +29,4 @@
     margin: auto;
     overflow: hidden;
     padding: 10px;
-    list-style: none;
 }

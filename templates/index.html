@@ -4,12 +4,12 @@
 {% block title %}首页{% endblock %}
 {% block main %}
     <div class="main">
-        <ul>
+        <ul class="article-list">
             {% for article in articles %}
                 <li>
                     <div class="article-group">
-                        <a class="article-title"><a
-                                href="{{ url_for('detail',article_id=article.id) }}"> {{ article.title }}</a></a></p>
+                        <div class="article-title"><a
+                                href="{{ url_for('detail',article_id=article.id) }}"> {{ article.title }}</a></div>
                         <p class="article-content">{{ article.content }}</p>
                         <div class="article-info">
                             <span class="article-author">{{ article.author.username }}</span>

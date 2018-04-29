@@ -86,11 +86,8 @@ def newblog():
 
 @app.route('/detail/<article_id>/')
 def detail(article_id):
-    content={
-    'article':Article.query.filter(Article.id == article_id).first(),
-    'comments' : Comment.query.filter(Comment.article_id==article_id).all()
-    }
-    return render_template('detail.html', **content)
+    article = Article.query.filter(Article.id == article_id).first()
+    return render_template('detail.html', article=article)
 
 
 @app.route('/add_comment/', methods=['POST'])
@@ -105,8 +102,6 @@ def add_comment():
     comment.article = article
     db.session.add(comment)
     db.session.commit()
-    print(comment.author)
-    print(comment.article)
     return redirect(url_for('detail', article_id=article_id))
 
 

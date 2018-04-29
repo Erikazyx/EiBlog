@@ -27,7 +27,7 @@
             {% else %}
             <p><a href="{{  url_for('login')}}">登陆</a>后才能评论</p>
         {% endif %}
-        {%  if comments%}
+        {% if article.comments %}
         {% for comment in article.comments %}
             <h4 class="comment">{{comment.content }}</h4>
             <p class="comment-info">
