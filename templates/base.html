@@ -45,7 +45,7 @@
                            aria-expanded="false">{{ user.username }} <span class="caret"></span></a>
                         <ul class="dropdown-menu">
                         {% if user.admin %}
-                            <li><a href="{{ url_for('newblog') }}">新博客</a></li>
+                            <li><a href="{{ url_for('new_blog') }}">新博客</a></li>
                         {% endif %}
                         <li><a href="{{ url_for('logout') }}">注销</a></li>
                     {% else %}

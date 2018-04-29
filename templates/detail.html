@@ -7,12 +7,18 @@
     <div class="main">
         <h3 class="page_title">{{ article.title }}</h3>
         <p class="article-info">
-            <span>作者：{{ article.author.username }}</span>
+            <span>作者：{{ author.username }}</span>
             <span>时间：{{ article.create_time }}</span>
         </p>
         <hr>
         <p class="article-content">{{ article.content }}</p>
         <hr>
+        {% if user %}
+            {% if user.admin %}
+                <a href="{{ url_for('edit_blog',article_id = article.id) }}" class="editblog">修改文章</a>
+                <a href="{{ url_for('delete_blog',article_id = article.id) }}" class="delete_blog">删除文章</a>
+            {% endif %}
+        {% endif %}
         <h4>评论</h4>
         {% if user %}
         <form action="{{ url_for('add_comment') }}" method="post">
@@ -27,11 +33,11 @@
             {% else %}
             <p><a href="{{  url_for('login')}}">登陆</a>后才能评论</p>
         {% endif %}
-        {% if article.comments %}
-        {% for comment in article.comments %}
+        {% if comments %}
+        {% for comment in comments %}
             <h4 class="comment">{{comment.content }}</h4>
             <p class="comment-info">
-            <span>by {{ comment.author.username }}</span>
+            <span>by {{ comment_author[comment.id] }}</span>
             <span>at {{ comment.create_time }}</span>
             </p>
             <hr>

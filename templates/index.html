@@ -12,7 +12,7 @@
                                 href="{{ url_for('detail',article_id=article.id) }}"> {{ article.title }}</a></div>
                         <p class="article-content">{{ article.content }}</p>
                         <div class="article-info">
-                            <span class="article-author">{{ article.author.username }}</span>
+                            <span class="article-author">{{ authors[article.id] }}</span>
                             <span class="article-time">{{ article.create_time }}</span>
                         </div>
                     </div>
