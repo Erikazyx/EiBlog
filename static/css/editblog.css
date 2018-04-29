@@ -1,10 +1,11 @@
+.form_container{
+        width:800px;
+        margin: auto;
+}
 .main{
     background:whitesmoke;
-    width:1230px;
+    width:1000px;
     margin: auto;
     overflow: hidden;
     padding: 10px;
-}
-.page_title{
-    text-align: center;
 }

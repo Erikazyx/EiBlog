@@ -1,4 +1,23 @@
 {% extends 'base.html' %}
-
+{% block head %}    <link rel="stylesheet" href="{{url_for('static',filename='css/index.css')}}">
+{% endblock %}
 {% block title %}首页{% endblock %}
-{% block main %}这是首页{% endblock %}
+{% block main %}
+    <div class="main">
+        <ul>
+            {% for article in articles %}
+                <li>
+                    <div class="article-group">
+                        <a class="article-title"><a
+                                href="{{ url_for('detail',article_id=article.id) }}"> {{ article.title }}</a></a></p>
+                        <p class="article-content">{{ article.content }}</p>
+                        <div class="article-info">
+                            <span class="article-author">{{ article.author.username }}</span>
+                            <span class="article-time">{{ article.create_time }}</span>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

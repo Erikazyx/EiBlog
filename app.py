@@ -1,7 +1,7 @@
 #encoding:utf-8
 from flask import Flask,render_template,request,redirect,url_for,session
 import config
-from models import User
+from models import User,Article,Comment
 from exts import db
 import re
 
@@ -13,7 +13,10 @@ isvalid = re.compile(r'^[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$')
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    context={
+        'articles':Article.query.order_by('-create_time').all()
+    }
+    return render_template('index.html', **context)
 
 
 @app.route('/login/', methods=['GET', 'POST'])
@@ -22,9 +25,7 @@ def login():
         return render_template('login.html')
     else:
         email = request.form.get('Email')
-        print(email)
         password = request.form.get('Password')
-        print(password)
         user = User.query.filter(User.email==email, User.password==password).first()
         if user:
             session['user_id']=user.id
@@ -67,13 +68,55 @@ def logout():
     return redirect(url_for('index'))
 
 
+@app.route('/newblog/',methods=['POST','GET'])
+def newblog():
+    if request.method=='GET':
+        return render_template('editblog.html')
+    else:
+        title = request.form.get('title')
+        content = request.form.get('content')
+        article = Article(title=title, content=content)
+        user_id = session.get('user_id')
+        user = User.query.filter(User.id==user_id).first()
+        article.author = user
+        db.session.add(article)
+        db.session.commit()
+        return redirect(url_for('index'))
+
+
+@app.route('/detail/<article_id>/')
+def detail(article_id):
+    content={
+    'article':Article.query.filter(Article.id == article_id).first(),
+    'comments' : Comment.query.filter(Comment.article_id==article_id).all()
+    }
+    return render_template('detail.html', **content)
+
+
+@app.route('/add_comment/', methods=['POST'])
+def add_comment():
+    content = request.form.get('comment_content')
+    article_id = request.form.get('article_id')
+    comment = Comment(content=content)
+    user_id = session['user_id']
+    user = User.query.filter(User.id == user_id).first()
+    comment.author = user
+    article = Article.query.filter(Article.id == article_id).first()
+    comment.article = article
+    db.session.add(comment)
+    db.session.commit()
+    print(comment.author)
+    print(comment.article)
+    return redirect(url_for('detail', article_id=article_id))
+
+
 @app.context_processor
 def getuser():
     user_id = session.get('user_id')
     if user_id:
         user = User.query.filter(User.id == user_id).first()
         if user:
-            return{'user':user}
+            return{'user': user}
     return {}
 
 

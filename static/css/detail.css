@@ -1,10 +1,16 @@
 .main{
     background:whitesmoke;
-    width:1230px;
+    width:830px;
     margin: auto;
     overflow: hidden;
     padding: 10px;
 }
-.page_title{
+
+.article-info{
     text-align: center;
+    margin-top: 10px;
+}
+
+.comment-info{
+    text-align: right;
 }

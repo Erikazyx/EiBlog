@@ -1,0 +1,34 @@
+.ul{
+    list-style: none;
+}
+
+.article-group{
+    width:800px;
+    margin-left: 10px;
+}
+
+.article-title a{
+    color: #995e4c;
+    font-weight:800;
+}
+
+.article-info{
+    text-align: right;
+}
+
+.article-info.article-author{
+    margin-right: 20px;
+}
+
+.ul li{
+    border-bottom: 1px ;
+}
+
+.main{
+    background:whitesmoke;
+    width:1000px;
+    margin: auto;
+    overflow: hidden;
+    padding: 10px;
+    list-style: none;
+}
