@@ -1,9 +1,8 @@
 {% extends 'base.html' %}
 {% block head %}
-{#    {% from bootsrap/pagination.html import render_pagenation %}#}
     <link rel="stylesheet" href="{{url_for('static',filename='css/index.css')}}">
 {% endblock %}
-{% block title %}首页{% endblock %}
+{% block title %}查询结果{% endblock %}
 {% block main %}
     <div class="main">
         <ul class="article-list">
@@ -20,21 +19,6 @@
                     </div>
                 </li>
             {% endfor %}
-        </ul>
-        <ul id="menu">
-            <li>
-                <a href="
-                        {% if pagination.has_prev %}{{ url_for('.index',page=pagination.page - 1) }}{% else %}#{% endif %}">«</a>
-            </li>
-            {% for p in pagination.iter_pages() %}
-                <li>
-                    <a href="{{ url_for('.index',page=p) }}">{{ p }}</a>
-                </li>
-            {% endfor %}
-            <li>
-                <a href="
-                        {% if pagination.has_next %}{{ url_for('.index',page=pagination.page + 1)}}{% else %}#{% endif %}">»</a>
-            </li>
         </ul>
     </div>
 {% endblock %}

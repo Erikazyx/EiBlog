@@ -10,3 +10,7 @@
     overflow: hidden;
     padding: 10px;
 }
+.flash_messages{
+    text-align: center;
+    color: crimson;
+}

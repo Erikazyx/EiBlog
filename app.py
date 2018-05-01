@@ -1,13 +1,14 @@
 #encoding:utf-8
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 import config
-from decorators import login_required, admin_required
-from models import User, Article, Comment
+from decorators import login_required, admin_required, is_none
+from models import User, Article, Comment, Category
 from exts import db
 import re
 from datetime import datetime
 
 app = Flask(__name__)
+app.add_template_filter(is_none, 'is_none')
 app.config.from_object('config')
 db.init_app(app)
 isvalid = re.compile(r'^[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$')
@@ -15,10 +16,11 @@ isvalid = re.compile(r'^[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$')
 
 @app.route('/')
 def index():
-    # context = {'articles': Article.query.order_by('-create_time').all()}
-    articles = Article.query.order_by(db.desc(Article.id)).all()
     authors = {}
-
+    page = request.args.get('page', 1, type=int)
+    pagination = Article.query.order_by(Article.create_time.desc()).paginate(page, per_page=10, error_out=False)
+    articles = pagination.items
+    categorys = Category.query.all()
     if articles:
         for article in articles:
             author = User.query.filter(User.id == article.author_id).first().username
@@ -26,7 +28,9 @@ def index():
 
     context = {
         'articles': articles,
-        'authors': authors
+        'authors': authors,
+        'pagination': pagination,
+        'categorys':categorys
     }
     return render_template('index.html', **context)
 
@@ -58,15 +62,19 @@ def register():
         password2 = request.form.get('Password2')
 
         if not username or not email or not password1 or not password2:
-            return u'任意项都不能为空'
+            flash('任意项都不能为空')
+            return render_template('register.html')
         if not isvalid.match(email):
-            return u'该邮箱不合法'
+            flash('请输入合法的邮箱地址')
+            return render_template('register.html')
         user = User.query.filter(User.email == email).first()
         if user:
-            return u'该邮箱已被注册'
+            flash('该邮箱已被注册')
+            return render_template('register.html')
         else:
             if password1 != password2:
-                return u'两次输入密码不同，请重试'
+                flash('两次输入密码不同，请重试')
+                return render_template('register.html')
             else:
                 user = User(email=email, username=username, password=password1)
                 db.session.add(user)
@@ -80,19 +88,46 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route('/new_blog/', methods=['POST', 'GET'])
+@app.route('/new_blog/', methods=[ 'GET'])
 @admin_required
 def new_blog():
     if request.method == 'GET':
-        return render_template('newblog.html')
+        categorys = Category.query.all()
+        return render_template('newblog.html', categorys=categorys)
     else:
         title = request.form.get('title')
         content = request.form.get('content')
+        tags = request.form.get('tags')
         user_id = session.get('user_id')
-        article = Article(title=title, content=content, author_id=user_id)
+        category_id = request.form.get('category_id')
+        article = Article(title=title, content=content, author_id=user_id, category_id=category_id, tags=tags)
         db.session.add(article)
         db.session.commit()
         return redirect(url_for('detail', article_id=article.id))
+
+
+@app.route('/search_articles/<category_id>', methods=['GET'])
+def search_article(category_id):
+    articles = Article.query.filter(Article.category_id == category_id).order_by(db.desc(Article.id)).all()
+    authors = {}
+    if articles:
+        for article in articles:
+            author = User.query.filter(User.id == article.author_id).first().username
+            authors[article.id] = author
+    context = {
+        'articles': articles,
+        'authors': authors,
+    }
+    return render_template('search_article.html', **context)
+
+
+@app.route('/add_category/', methods=['POST'])
+def add_category():
+    category_name = request.form.get('category_name')
+    category = Category(name=category_name)
+    db.session.add(category)
+    db.session.commit()
+    return redirect(url_for('new_blog'))
 
 
 @app.route('/edit_blog/<article_id>', methods=['POST', 'GET'])
@@ -106,16 +141,21 @@ def edit_blog(article_id):
         article = Article.query.filter(Article.id == article_id).first()
         article.title = request.form.get('title')
         article.content = request.form.get('content')
+        article.category_id = request.form.get('category_id')
         article.create_time = datetime.now()
         db.session.commit()
         return redirect(url_for('detail', article_id=article_id))
 
 
-@app.route('/delete/<article_id>')
+@app.route('/delete/<item_name>/<item_id>/')
 @admin_required
-def delete_blog(article_id):
-    article = Article.query.filter(Article.id == article_id).first()
-    db.session.delete(article)
+def delete_action(item_id, item_name):
+    if item_name == 'comment':
+        item = Comment.query.filter(Comment.id == item_id).first()
+    else:
+        item = Article.query.filter(Article.id == item_id).first()
+
+    db.session.delete(item)
     db.session.commit()
     return redirect(url_for('index'))
 
@@ -125,6 +165,7 @@ def detail(article_id):
     article = Article.query.filter(Article.id == article_id).first()
     author = User.query.filter(User.id == article.author_id).first()
     comments = Comment.query.filter(Comment.article_id == article_id).order_by(db.desc(Comment.id)).all()
+    category = Category.query.filter(Category.id == article.category_id).first()
     comment_author = {}
     if comments:
         for comment in comments:
@@ -133,7 +174,8 @@ def detail(article_id):
         'article': article,
         'author': author,
         'comments': comments,
-        'comment_author': comment_author
+        'comment_author': comment_author,
+        'category': category
     }
     return render_template('detail.html', **context)
 
@@ -158,6 +200,12 @@ def getuser():
         if user:
             return{'user': user}
     return {}
+
+
+@app.context_processor
+def get_categorys():
+    categorys = Category.query.all()
+    return {'categorys': categorys}
 
 
 if __name__ == '__main__':

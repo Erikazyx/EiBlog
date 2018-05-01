@@ -11,6 +11,10 @@
     margin-top: 10px;
 }
 
+.article_tags{
+    text-align: center;
+}
+
 .comment-info{
     text-align: right;
 }

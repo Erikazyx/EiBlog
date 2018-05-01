@@ -1,3 +1,4 @@
+#encoding:utf-8
 from flask import redirect, session, url_for
 from functools import wraps
 from models import User
@@ -24,3 +25,11 @@ def admin_required(func):
         else:
             return redirect(url_for('login'))
     return wrapper
+
+
+def is_none(args):
+    if args:
+        return args
+    else:
+        return u'未设定'
+
