@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}管理评论{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{{url_for('static',filename='css/login.css')}}">
+{% endblock %}
+{% block main %}
+    <ul class="nav nav-tabs">
+        <li role="presentation"  name="article"><a href="{{ url_for('admin') }}">文章管理</a></li>
+        <li role="presentation"  name="article"><a href="{{ url_for('manage_comments') }}">评论管理</a></li>
+        <li role="presentation" class="active" name="user"><a href="#">用户管理</a></li>
+        <li role="presentation" name="category"><a href="{{ url_for('manage_categorys') }}">分类管理</a></li>
+    </ul>
+    <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th >用户名</th>
+                    <th >邮箱</th>
+                    <th >id</th>
+                    <th >操作</th>
+                </tr>
+            </thead>
+            <tbody>{%  for user in users %}
+                <tr>
+                    <td>
+                        <span>{{ user.username }}</span>
+                        {% if user.admin %}<i class="glyphicon glyphicon-user"></i>{% endif %}
+                    </td>
+                    <td>
+                        <span >{{ user.email }}</span>
+                    </td>
+                    <td>
+                        <span >{{ user.id }}</span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('delete_action',item_name = 'user',item_id = user.id) }}" ><i class="glyphicon glyphicon-trash"></i></a>
+                    </td>
+
+                </tr>{% endfor %}
+            </tbody>
+
+    </table>
+            <nav style="text-align: center">
+            <ul class="pagination">
+            <li>
+                <a href="
+                        {% if pagination.has_prev %}{{ url_for('manage_users',page=pagination.page - 1) }}{% else %}#{% endif %}">«</a>
+            </li>
+            {% for p in pagination.iter_pages() %}
+                <li>
+                    <a href="{{ url_for('manage_users',page=p) }}">{{ p }}</a>
+                </li>
+            {% endfor %}
+            <li>
+                <a href="
+                        {% if pagination.has_next %}{{ url_for('manage_users',page=pagination.page + 1)}}{% else %}#{% endif %}">»</a>
+            </li>
+        </ul>
+            </nav>
+{% endblock %}

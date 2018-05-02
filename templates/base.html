@@ -32,7 +32,7 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                            aria-expanded="false">按分类查看 <span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            {% for category in categorys %}
+                            {% for category in nav_category %}
                                 <li><a href="
                            {{ url_for('search_article',category_id = category.id) }}">{{ category.name }}</a></li>
                                 <li role="separator" class="divider"></li>
@@ -54,10 +54,13 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                            aria-expanded="false">{{ user.username }} <span class="caret"></span></a>
                         <ul class="dropdown-menu">
+                            <li><a href="{{ url_for('logout') }}">注销</a></li>
                         {% if user.admin %}
                             <li><a href="{{ url_for('new_blog') }}">新博客</a></li>
+                            <li role="separator" class="divider"></li>
+                            <li><a href="{{ url_for('admin') }}">管理页面</a>
                         {% endif %}
-                        <li><a href="{{ url_for('logout') }}">注销</a></li>
+
                     {% else %}
                         <li><a href="{{ url_for('register') }}">注册</a></li>
                         <li><a href="{{ url_for('login') }}">登陆</a></li>

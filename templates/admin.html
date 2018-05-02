@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}管理博客{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{{url_for('static',filename='css/login.css')}}">
+{% endblock %}
+{% block main %}
+    <ul class="nav nav-tabs">
+        <li role="presentation"  name="article" class="active"><a href="#">文章管理</a></li>
+        <li role="presentation"  name="article"><a href="{{ url_for('manage_comments') }}">评论管理</a></li>
+        <li role="presentation" name="user"><a href="{{ url_for('manage_users') }}">用户管理</a></li>
+        <li role="presentation" name="category"><a href="{{ url_for('manage_categorys') }}">分类管理</a></li>
+    </ul>
+    <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th >标题 / 摘要</th>
+                    <th >作者</th>
+                    <th >创建时间</th>
+                    <th>分类</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>{%  for  article in articles %}
+                <tr>
+
+                    <td>
+                        <a target="_blank" href="{{ url_for('detail',article_id = article.id) }}">{{ article.title }}/{{ article.content | truncate(50, True,'.....') }}</a>
+                    </td>
+                    <td>
+                        <span>{{ authors[article.id] }}</span>
+                    </td>
+                    <td>
+                        <span >{{ article.create_time }}</span>
+                    </td>
+                    <td>
+                        <span >{{ categorys[article.id] }}</span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('edit_blog',article_id = article.id) }}"><i class="glyphicon glyphicon-pencil"></i>
+                            <a href="{{ url_for('delete_action',item_name = 'article', item_id = article.id) }}" ><i class="glyphicon glyphicon-trash"></i></a>
+                    </td>
+
+                </tr>{% endfor %}
+            </tbody>
+
+    </table>
+                <nav style="text-align: center">
+            <ul class="pagination">
+            <li>
+                <a href="
+                        {% if pagination.has_prev %}{{ url_for('admin',page=pagination.page - 1) }}{% else %}#{% endif %}">«</a>
+            </li>
+            {% for p in pagination.iter_pages() %}
+                <li>
+                    <a href="{{ url_for('admin',page=p) }}">{{ p }}</a>
+                </li>
+            {% endfor %}
+            <li>
+                <a href="
+                        {% if pagination.has_next %}{{ url_for('admin',page=pagination.page + 1)}}{% else %}#{% endif %}">»</a>
+            </li>
+        </ul>
+            </nav>
+
+{% endblock %}

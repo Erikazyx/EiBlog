@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}管理评论{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{{url_for('static',filename='css/login.css')}}">
+{% endblock %}
+{% block main %}
+    <ul class="nav nav-tabs">
+        <li role="presentation"  name="article"><a href="{{ url_for('admin') }}">文章管理</a></li>
+        <li role="presentation" class="active" name="comment"><a href="#">评论管理</a></li>
+        <li role="presentation" name="user"><a href="{{ url_for('manage_users') }}">用户管理</a></li>
+        <li role="presentation" name="category"><a href="{{ url_for('manage_categorys') }}">分类管理</a></li>
+    </ul>
+    <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th class="uk-width-5-10">摘要</th>
+                    <th class="uk-width-2-10">作者</th>
+                    <th class="uk-width-2-10">创建时间</th>
+                    <th>文章名称</th>
+                    <th class="uk-width-1-10">操作</th>
+                </tr>
+            </thead>
+            <tbody>{%  for comment in comments %}
+                <tr>
+
+                    <td>
+                        <a target="_blank" href="{{ url_for('detail',article_id = comment.article_id) }}">{{ comment.content | truncate(50, True,'.....') }}</a>
+                    </td>
+                    <td>
+                        <span>{{ authors[comment.id] }}</span>
+                    </td>
+                    <td>
+                        <span >{{ comment.create_time }}</span>
+                    </td>
+                    <td>
+                        <span >{{ article[comment.id] }}</span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('delete_action',item_name = 'comment',item_id = article.id) }}" ><i class="glyphicon glyphicon-trash"></i></a>
+                    </td>
+
+                </tr>{% endfor %}
+            </tbody>
+
+    </table>
+            <nav style="text-align: center">
+            <ul class="pagination">
+            <li>
+                <a href="
+                        {% if pagination.has_prev %}{{ url_for('manage_comments',page=pagination.page - 1) }}{% else %}#{% endif %}">«</a>
+            </li>
+            {% for p in pagination.iter_pages() %}
+                <li>
+                    <a href="{{ url_for('manage_comments',page=p) }}">{{ p }}</a>
+                </li>
+            {% endfor %}
+            <li>
+                <a href="
+                        {% if pagination.has_next %}{{ url_for('manage_comments',page=pagination.page + 1)}}{% else %}#{% endif %}">»</a>
+            </li>
+        </ul>
+            </nav>
+{% endblock %}

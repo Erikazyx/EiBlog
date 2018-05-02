@@ -20,7 +20,6 @@ def index():
     page = request.args.get('page', 1, type=int)
     pagination = Article.query.order_by(Article.create_time.desc()).paginate(page, per_page=10, error_out=False)
     articles = pagination.items
-    categorys = Category.query.all()
     if articles:
         for article in articles:
             author = User.query.filter(User.id == article.author_id).first().username
@@ -30,7 +29,6 @@ def index():
         'articles': articles,
         'authors': authors,
         'pagination': pagination,
-        'categorys':categorys
     }
     return render_template('index.html', **context)
 
@@ -88,7 +86,66 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route('/new_blog/', methods=[ 'GET'])
+@app.route('/admin/')
+@admin_required
+def admin():
+    authors = {}
+    category = {}
+    page = request.args.get('page', 1, type=int)
+    pagination = Article.query.order_by(Article.create_time.desc()).paginate(page, per_page=20, error_out=False)
+    articles = pagination.items
+
+    if articles:
+        for article in articles:
+            author = User.query.filter(User.id == article.author_id).first().username
+            if article.category_id:
+                category_name = Category.query.filter(Category.id == article.category_id).first().name
+            else:
+                category_name = '未分类'
+            authors[article.id] = author
+            category[article.id] = category_name
+
+    context = {
+        'articles': articles,
+        'authors': authors,
+        'pagination': pagination,
+        'categorys': category
+    }
+    return render_template('admin.html', **context)
+
+
+@app.route('/manage_comments/')
+@admin_required
+def manage_comments():
+    author = {}
+    article = {}
+    page = request.args.get('page', 1, type=int)
+    pagination = Comment.query.order_by(Comment.create_time.desc()).paginate(page, per_page=20, error_out=False)
+    comments = pagination.items
+    if comments:
+        for comment in comments:
+            author[comment.id] = User.query.filter(User.id == Comment.author_id).first().username
+            article[comment.id] = Article.query.filter(Article.id == Comment.article_id).first().title
+    return render_template('manage_comments.html', comments=comments, authors=author,
+                           article=article, pagination=pagination)
+
+
+@app.route('/manage_users/')
+@admin_required
+def manage_users():
+    page = request.args.get('page', 1, type=int)
+    pagination = User.query.paginate(page, per_page=20, error_out=False)
+    users = pagination.items
+    return render_template('manage_users.html', users=users, pagination=pagination)
+
+
+@app.route('/manage_categorys/')
+@admin_required
+def manage_categorys():
+    categorys = Category.query.all()
+    return render_template('manage_categorys.html', categorys=categorys)
+
+@app.route('/new_blog/', methods=['GET'])
 @admin_required
 def new_blog():
     if request.method == 'GET':
@@ -152,9 +209,12 @@ def edit_blog(article_id):
 def delete_action(item_id, item_name):
     if item_name == 'comment':
         item = Comment.query.filter(Comment.id == item_id).first()
-    else:
+    elif item_name =='article':
         item = Article.query.filter(Article.id == item_id).first()
-
+    elif item_name =='user':
+        item = User.query.filter(User.id == item_id).first()
+    else:
+        item = Category.query.filter(Category.id == item_id).first()
     db.session.delete(item)
     db.session.commit()
     return redirect(url_for('index'))
@@ -205,7 +265,7 @@ def getuser():
 @app.context_processor
 def get_categorys():
     categorys = Category.query.all()
-    return {'categorys': categorys}
+    return {'nav_category': categorys}
 
 
 if __name__ == '__main__':
