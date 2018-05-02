@@ -11,7 +11,11 @@
             <span>时间：{{ article.create_time }}</span>
             <span>分类：{{ category.name | is_none }}</span>
         </p>
-        <p class="article_tags">标签：{{ article.tags | is_none }}</p>
+        <p class="article_tags">标签：{% if tags %}{% for tag in tags %}
+        <span class="label label-default">{{ tag }}</span>
+        {% endfor %}
+        {% else %} 未设定{% endif %}
+        </p>
         <hr>
         <p class="article-content">{{ article.content }}</p>
         <hr>

@@ -21,4 +21,22 @@
             {% endfor %}
         </ul>
     </div>
+                <nav style="text-align: center">
+            <ul class="pagination">
+            <li>
+                <a href="
+                        {% if pagination.has_prev %}{{ url_for('search_article',page=pagination.page - 1,search_type = type_,item = item_) }}{% else %}#{% endif %}">«</a>
+            </li>
+            {% for p in pagination.page_list %}
+                <li>
+                    <a href="{{ url_for('search_article',page=p,search_type = type_,item = item_) }}">{{ p }}</a>
+                </li>
+            {% endfor %}
+            <li>
+                <a href="
+                        {% if pagination.has_next %}{{ url_for('search_article',page=pagination.page + 1, search_type = type_,item = item_)}}{% else %}#{% endif %}">»</a>
+            </li>
+        </ul>
+            </nav>
+
 {% endblock %}

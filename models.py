@@ -18,8 +18,6 @@ class Article(db.Model):
     content = db.Column(db.Text, nullable=False)
     author_id = db.Column(db.Integer, nullable=False)
     create_time = db.Column(db.DateTime, default=datetime.now)
-    # author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    # author = db.relationship('User', backref=db.backref('articles'))
     category_id = db.Column(db.Integer, nullable=True)
     tags = db.Column(db.String(50), nullable=True)
 
@@ -30,14 +28,16 @@ class Comment(db.Model):
     content = db.Column(db.Text, nullable=False)
     article_id = db.Column(db.Integer, nullable=False)
     author_id = db.Column(db.Integer, nullable=False)
-    # article_id = db.Column(db.Integer, db.ForeignKey('article.id'))
-    # author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     create_time = db.Column(db.DateTime, default=datetime.now)
-    # article = db.relationship('Article', backref=db.backref('comments', order_by=id.desc()))
-    # author = db.relationship('User', backref=db.backref('comments'))
 
 
 class Category(db.Model):
     __tablename__ = 'category'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(50), nullable=False)
+
+
+class Tag(db.Model):
+    __tablename__ = 'tag'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(50), nullable=False)

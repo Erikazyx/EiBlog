@@ -1,8 +1,8 @@
 #encoding:utf-8
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import config
-from decorators import login_required, admin_required, is_none
-from models import User, Article, Comment, Category
+from decorators import login_required, admin_required, is_none, Page
+from models import User, Article, Comment, Category, Tag
 from exts import db
 import re
 from datetime import datetime
@@ -66,6 +66,10 @@ def register():
             flash('请输入合法的邮箱地址')
             return render_template('register.html')
         user = User.query.filter(User.email == email).first()
+        user_name = User.query.filter(User.username == username).first()
+        if user_name:
+            flash('该用户名已被使用')
+            return render_template('register.html')
         if user:
             flash('该邮箱已被注册')
             return render_template('register.html')
@@ -145,7 +149,8 @@ def manage_categorys():
     categorys = Category.query.all()
     return render_template('manage_categorys.html', categorys=categorys)
 
-@app.route('/new_blog/', methods=['GET'])
+
+@app.route('/new_blog/', methods=['GET', 'POST'])
 @admin_required
 def new_blog():
     if request.method == 'GET':
@@ -155,6 +160,14 @@ def new_blog():
         title = request.form.get('title')
         content = request.form.get('content')
         tags = request.form.get('tags')
+        tag_list = re.split(r'\s*,\s*', tags)
+        current_tag = Tag.query.all()
+        T = []
+        for tag in current_tag:
+            T.append(tag.name)
+        for tag in tag_list:
+            if tag not in T:
+                db.session.add(Tag(name=tag))
         user_id = session.get('user_id')
         category_id = request.form.get('category_id')
         article = Article(title=title, content=content, author_id=user_id, category_id=category_id, tags=tags)
@@ -163,17 +176,49 @@ def new_blog():
         return redirect(url_for('detail', article_id=article.id))
 
 
-@app.route('/search_articles/<category_id>', methods=['GET'])
-def search_article(category_id):
-    articles = Article.query.filter(Article.category_id == category_id).order_by(db.desc(Article.id)).all()
+def get_page_index(page_str):
+    p = 1
+    try:
+        p = int(page_str)
+    except ValueError as e:
+        pass
+    if p < 1:
+        p = 1
+    return p
+
+
+@app.route('/search_articles/<search_type>/<item>', methods=['GET'])
+def search_article(search_type, item, *, page='1'):
+    type_ = search_type
+    item_ = item
+    page_index = get_page_index(page)
+    if search_type == 'tag':
+        articles = []
+        all_articles = Article.query.all()
+        for article in all_articles:
+            tags = re.split(r'\s*,\s*', str(article.tags))
+            if item in tags:
+                articles.append(article)
+        article_count = len(articles)
+    else:
+        articles = Article.query.filter(Article.category_id == item).order_by(db.desc(Article.id)).all()
+        article_count = Article.query.filter(Article.category_id == item).count()
+    page = Page(article_count, page_index)
     authors = {}
     if articles:
         for article in articles:
             author = User.query.filter(User.id == article.author_id).first().username
             authors[article.id] = author
+    if article_count == 0:
+        articles = []
+    else:
+        articles = articles[page.offset: page.limit]
     context = {
         'articles': articles,
         'authors': authors,
+        'type_': type_,
+        'item_': item_,
+        'pagination': page
     }
     return render_template('search_article.html', **context)
 
@@ -209,12 +254,24 @@ def edit_blog(article_id):
 def delete_action(item_id, item_name):
     if item_name == 'comment':
         item = Comment.query.filter(Comment.id == item_id).first()
-    elif item_name =='article':
+    elif item_name == 'article':
         item = Article.query.filter(Article.id == item_id).first()
-    elif item_name =='user':
+        comment = Comment.query.filter(Comment.article_id == item_id).all()
+        for i in comment:
+            db.session.delete(i)
+    elif item_name == 'user':
         item = User.query.filter(User.id == item_id).first()
+        comment = Comment.query.filter(Comment.author_id == item_id).all()
+        article = Article.query.filter(Article.author_id == item_id).all()
+        for i in article:
+            db.session.delete(i)
+        for i in comment:
+            db.session.delete(i)
     else:
         item = Category.query.filter(Category.id == item_id).first()
+        article = Article.query.filter(Article.category_id == item_id).all()
+        for i in article:
+            i.category_id = None
     db.session.delete(item)
     db.session.commit()
     return redirect(url_for('index'))
@@ -227,6 +284,9 @@ def detail(article_id):
     comments = Comment.query.filter(Comment.article_id == article_id).order_by(db.desc(Comment.id)).all()
     category = Category.query.filter(Category.id == article.category_id).first()
     comment_author = {}
+    tag_list = []
+    if article.tags:
+        tag_list = re.split(r'\s*,\s*', article.tags)
     if comments:
         for comment in comments:
             comment_author[comment.id] = User.query.filter(User.id == comment.author_id).first().username
@@ -235,7 +295,8 @@ def detail(article_id):
         'author': author,
         'comments': comments,
         'comment_author': comment_author,
-        'category': category
+        'category': category,
+        'tags': tag_list
     }
     return render_template('detail.html', **context)
 
@@ -263,9 +324,10 @@ def getuser():
 
 
 @app.context_processor
-def get_categorys():
+def get_categorys_and_tags():
     categorys = Category.query.all()
-    return {'nav_category': categorys}
+    tags = Tag.query.all()
+    return {'nav_category': categorys, 'nav_tags': tags}
 
 
 if __name__ == '__main__':
