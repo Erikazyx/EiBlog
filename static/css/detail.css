@@ -15,6 +15,10 @@
     text-align: center;
 }
 
+.article_tags a{
+    color: white;
+}
+
 .comment-info{
     text-align: right;
 }

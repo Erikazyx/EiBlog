@@ -12,7 +12,8 @@
             <span>分类：{{ category.name | is_none }}</span>
         </p>
         <p class="article_tags">标签：{% if tags %}{% for tag in tags %}
-        <span class="label label-default">{{ tag }}</span>
+        <span class="label label-default"><a href="
+                                {{ url_for('search_article',item = tag,search_type = 'tag') }}">{{ tag }}</a></span>
         {% endfor %}
         {% else %} 未设定{% endif %}
         </p>
