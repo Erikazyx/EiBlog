@@ -9,3 +9,7 @@
     overflow: hidden;
     padding: 10px;
 }
+
+.editor{
+    display: none;
+}

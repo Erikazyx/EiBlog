@@ -20,6 +20,7 @@ class Article(db.Model):
     create_time = db.Column(db.DateTime, default=datetime.now)
     category_id = db.Column(db.Integer, nullable=True)
     tags = db.Column(db.String(50), nullable=True)
+    edit_time = db.Column(db.DateTime, nullable=True)
 
 
 class Comment(db.Model):

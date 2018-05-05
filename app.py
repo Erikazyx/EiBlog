@@ -155,9 +155,11 @@ def manage_categorys():
 def new_blog():
     if request.method == 'GET':
         categorys = Category.query.all()
-        return render_template('newblog.html', categorys=categorys)
+        return render_template('new_editor.html', categorys=categorys)
     else:
         title = request.form.get('title')
+        if not title:
+            return u'标题不能为空'
         content = request.form.get('content')
         tags = request.form.get('tags')
         tag_list = re.split(r'\s*,\s*', tags)
@@ -242,9 +244,14 @@ def edit_blog(article_id):
         article_id = request.form.get('article_id')
         article = Article.query.filter(Article.id == article_id).first()
         article.title = request.form.get('title')
+        if not article.title:
+            return u'标题不能为空'
         article.content = request.form.get('content')
+        if not article.content:
+            return u'文章不能为空'
+        article.tags = request.form.get('tags')
         article.category_id = request.form.get('category_id')
-        article.create_time = datetime.now()
+        article.edit_time = datetime.now()
         db.session.commit()
         return redirect(url_for('detail', article_id=article_id))
 
@@ -281,10 +288,13 @@ def delete_action(item_id, item_name):
 def detail(article_id):
     article = Article.query.filter(Article.id == article_id).first()
     author = User.query.filter(User.id == article.author_id).first()
-    comments = Comment.query.filter(Comment.article_id == article_id).order_by(db.desc(Comment.id)).all()
+    # comments = Comment.query.filter(Comment.article_id == article_id).order_by(db.desc(Comment.id)).all()
     category = Category.query.filter(Category.id == article.category_id).first()
     comment_author = {}
     tag_list = []
+    page = request.args.get('page', 1, type=int)
+    pagination = Comment.query.order_by(Comment.create_time.desc()).paginate(page, per_page=10, error_out=False)
+    comments = pagination.items
     if article.tags:
         tag_list = re.split(r'\s*,\s*', article.tags)
     if comments:
@@ -296,7 +306,8 @@ def detail(article_id):
         'comments': comments,
         'comment_author': comment_author,
         'category': category,
-        'tags': tag_list
+        'tags': tag_list,
+        'pagination': pagination,
     }
     return render_template('detail.html', **context)
 
@@ -305,6 +316,8 @@ def detail(article_id):
 @login_required
 def add_comment():
     content = request.form.get('comment_content')
+    if not content:
+        return u'评论不能为空'
     article_id = request.form.get('article_id')
     user_id = session['user_id']
     comment = Comment(content=content, article_id=article_id, author_id=user_id)
