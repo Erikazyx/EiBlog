@@ -1,0 +1,9 @@
+# -*- coding: utf-8 -*-
+
+DEBUG = False
+
+# Production set SECRET_KEY
+SECRET_KEY = '' or 'f026d9f04f60412ab116e0eb57efb2a4'
+
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://<username>:<password>@<host>/<dbname>[?<options>]'
+SQLALCHEMY_TRACK_MODIFICATIONS = False

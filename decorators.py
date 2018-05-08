@@ -1,4 +1,4 @@
-#encoding:utf-8
+# encoding:utf-8
 from flask import redirect, session, url_for
 from functools import wraps
 from models import User
