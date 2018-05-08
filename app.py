@@ -1,15 +1,21 @@
-#encoding:utf-8
-from flask import Flask, render_template, request, redirect, url_for, session, flash
-import config
-from decorators import login_required, admin_required, is_none, Page
-from models import User, Article, Comment, Category, Tag
-from exts import db
+# encoding:utf-8
 import re
 from datetime import datetime
 
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask_sqlalchemy import SQLAlchemy
+
+import config
+from decorators import login_required, admin_required, is_none, Page
+from models import User, Article, Comment, Category, Tag
+
+
 app = Flask(__name__)
+
 app.add_template_filter(is_none, 'is_none')
-app.config.from_object('config')
+app.config.from_object(config)
+
+db = SQLAlchemy()
 db.init_app(app)
 isvalid = re.compile(r'^[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$')
 
@@ -341,7 +347,3 @@ def get_categorys_and_tags():
     categorys = Category.query.all()
     tags = Tag.query.all()
     return {'nav_category': categorys, 'nav_tags': tags}
-
-
-if __name__ == '__main__':
-    app.run()
