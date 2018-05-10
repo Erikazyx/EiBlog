@@ -17,12 +17,21 @@
     margin-right: 20px;
 }
 
-.article-list li{
+/*.article-list li{*/
+.odd{
     border-bottom: 1px solid ;
     list-style: none;
-    border-bottom-color: gray;
+    border-bottom-color:dimgray;
     margin:20px;
     background: white;
+}
+
+.even{
+    border-bottom: 1px solid ;
+    list-style: none;
+    border-bottom-color: dimgray;
+    margin:20px;
+    background: #f5e4ff;
 }
 
 .main{

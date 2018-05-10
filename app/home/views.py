@@ -1,21 +1,21 @@
 import re
 from datetime import datetime
-
-from app import app, db
+from app.home import main
+from app import db
 
 from flask import render_template, request, redirect, url_for, session, flash
-from decorators import login_required, admin_required, Page
-from models import User, Article, Comment, Category, Tag
+from app.decorators import login_required, admin_required, Page
+from app.models import User, Article, Comment, Category, Tag
 
 isvalid = re.compile(r'^[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$')
 
 
-@app.route('/ping')
+@main.route('/ping')
 def pong():
     return 'pong'
 
 
-@app.route('/')
+@main.route('/')
 def index():
     authors = {}
     page = request.args.get('page', 1, type=int)
@@ -34,7 +34,7 @@ def index():
     return render_template('index.html', **context)
 
 
-@app.route('/login/', methods=['GET', 'POST'])
+@main.route('/login/', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
         return render_template('login.html')
@@ -50,7 +50,7 @@ def login():
             return u'用户名或密码错误 请重试'
 
 
-@app.route('/register/', methods=['GET', 'POST'])
+@main.route('/register/', methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
         return render_template('register.html')
@@ -85,13 +85,13 @@ def register():
                 return redirect(url_for('login'))
 
 
-@app.route('/logout/')
+@main.route('/logout/')
 def logout():
     session.clear()
     return redirect(url_for('index'))
 
 
-@app.route('/admin/')
+@main.route('/admin/')
 @admin_required
 def admin():
     authors = {}
@@ -119,7 +119,7 @@ def admin():
     return render_template('admin.html', **context)
 
 
-@app.route('/manage_comments/')
+@main.route('/manage_comments/')
 @admin_required
 def manage_comments():
     author = {}
@@ -135,7 +135,7 @@ def manage_comments():
                            article=article, pagination=pagination)
 
 
-@app.route('/manage_users/')
+@main.route('/manage_users/')
 @admin_required
 def manage_users():
     page = request.args.get('page', 1, type=int)
@@ -144,14 +144,14 @@ def manage_users():
     return render_template('manage_users.html', users=users, pagination=pagination)
 
 
-@app.route('/manage_categorys/')
+@main.route('/manage_categorys/')
 @admin_required
 def manage_categorys():
     categorys = Category.query.all()
     return render_template('manage_categorys.html', categorys=categorys)
 
 
-@app.route('/new_blog/', methods=['GET', 'POST'])
+@main.route('/new_blog/', methods=['GET', 'POST'])
 @admin_required
 def new_blog():
     if request.method == 'GET':
@@ -190,7 +190,7 @@ def get_page_index(page_str):
     return p
 
 
-@app.route('/search_articles/<search_type>/<item>', methods=['GET'])
+@main.route('/search_articles/<search_type>/<item>', methods=['GET'])
 def search_article(search_type, item, *, page='1'):
     type_ = search_type
     item_ = item
@@ -226,7 +226,7 @@ def search_article(search_type, item, *, page='1'):
     return render_template('search_article.html', **context)
 
 
-@app.route('/add_category/', methods=['POST'])
+@main.route('/add_category/', methods=['POST'])
 def add_category():
     category_name = request.form.get('category_name')
     category = Category(name=category_name)
@@ -235,7 +235,7 @@ def add_category():
     return redirect(url_for('new_blog'))
 
 
-@app.route('/edit_blog/<article_id>', methods=['POST', 'GET'])
+@main.route('/edit_blog/<article_id>', methods=['POST', 'GET'])
 @admin_required
 def edit_blog(article_id):
     if request.method == 'GET':
@@ -257,7 +257,7 @@ def edit_blog(article_id):
         return redirect(url_for('detail', article_id=article_id))
 
 
-@app.route('/delete/<item_name>/<item_id>/')
+@main.route('/delete/<item_name>/<item_id>/')
 @admin_required
 def delete_action(item_id, item_name):
     if item_name == 'comment':
@@ -285,7 +285,7 @@ def delete_action(item_id, item_name):
     return redirect(url_for('index'))
 
 
-@app.route('/detail/<article_id>/')
+@main.route('/detail/<article_id>/')
 def detail(article_id):
     article = Article.query.filter(Article.id == article_id).first()
     author = User.query.filter(User.id == article.author_id).first()
@@ -313,7 +313,7 @@ def detail(article_id):
     return render_template('detail.html', **context)
 
 
-@app.route('/add_comment/', methods=['POST'])
+@main.route('/add_comment/', methods=['POST'])
 @login_required
 def add_comment():
     content = request.form.get('comment_content')
