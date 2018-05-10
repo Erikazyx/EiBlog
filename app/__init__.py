@@ -1,7 +1,8 @@
 # encoding:utf-8
 from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
-from app import config
+
+import config
 
 
 app = Flask(__name__)
