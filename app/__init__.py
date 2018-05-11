@@ -14,8 +14,10 @@ def create_app():
     app.add_template_filter(is_none, 'is_none')
     app.config.from_object(config)
     db.init_app(app)
-    from app.admin import test as main_blueprint
+    from app.home import main as main_blueprint
+    from app.admin import admin as admin_blueprint
     app.register_blueprint(main_blueprint, )
+    app.register_blueprint(admin_blueprint)
     return app
 
 

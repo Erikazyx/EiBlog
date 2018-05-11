@@ -6,7 +6,7 @@
 {% block main %}
     <div class="main">
         <h3 class="page_title">修改文章</h3>
-        <form action="{{ url_for('edit_blog',article_id=article.id) }}" method="post">
+        <form action="{{ url_for('admin.edit_blog',article_id=article.id) }}" method="post">
             <div class="form-container">
                 <div class="form-group">
                     <input type="hidden" name="article_id" value="{{ article.id }}">
@@ -17,9 +17,6 @@
                     {{ article.content | safe}}</div>
                 <textarea id="editor" name="content" class="form-control" style="width:100%; height:200px;"></textarea>
 
-                {#                <div class="form-group">#}
-                {#                    <textarea name="content" rows="10" class="form-control"#}
-                {#                              placeholder="">{{ article.content }}</textarea>#}
             </div>
             <div class="select_category">
                 <label for="category_id">选择分类

@@ -27,14 +27,14 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                 <ul class="nav navbar-nav">
-                    <li class="active"><a href="{{ url_for('index') }}">首页 <span class="sr-only">(current)</span></a></li>
+                    <li class="active"><a href="{{ url_for('main.index') }}">首页 <span class="sr-only">(current)</span></a></li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                            aria-expanded="false">按分类查看 <span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             {% for category in nav_category %}
                                 <li><a href="
-                           {{ url_for('search_article',item = category.id,search_type = 'category') }}">{{ category.name }}</a></li>
+                           {{ url_for('main.search_article',item = category.id,search_type = 'category') }}">{{ category.name }}</a></li>
                             {% endfor %}
                         </ul>
                     </li>
@@ -44,7 +44,7 @@
                         <ul class="dropdown-menu">
                             {% for tag in nav_tags %}
                                 <li><a href="
-                                {{ url_for('search_article',item = tag.name,search_type = 'tag') }}">{{ tag.name }}</a></li>
+                                {{ url_for('main.search_article',item = tag.name,search_type = 'tag') }}">{{ tag.name }}</a></li>
                             {% endfor %}
                         </ul>
                     </li>
@@ -55,16 +55,16 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                            aria-expanded="false">{{ user.username }} <span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            <li><a href="{{ url_for('logout') }}">注销</a></li>
+                            <li><a href="{{ url_for('main.logout') }}">注销</a></li>
                         {% if user.admin %}
-                            <li><a href="{{ url_for('new_blog') }}">新博客</a></li>
+                            <li><a href="{{ url_for('admin.new_blog') }}">新博客</a></li>
                             <li role="separator" class="divider"></li>
-                            <li><a href="{{ url_for('admin') }}">管理页面</a>
+                            <li><a href="{{ url_for('admin.admin_page') }}">管理页面</a>
                         {% endif %}
 
                     {% else %}
-                        <li><a href="{{ url_for('register') }}">注册</a></li>
-                        <li><a href="{{ url_for('login') }}">登陆</a></li>
+                        <li><a href="{{ url_for('main.register') }}">注册</a></li>
+                        <li><a href="{{ url_for('main.login') }}">登陆</a></li>
                     {% endif %}
                         </ul>
                     </li>

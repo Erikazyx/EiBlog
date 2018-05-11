@@ -14,7 +14,7 @@
         </p>
         <p class="article_tags">标签：{% if tags %}{% for tag in tags %}
             <span class="label label-default"><a href="
-                                {{ url_for('search_article',item = tag,search_type = 'tag') }}">{{ tag }}</a></span>
+                                {{ url_for('main.search_article',item = tag,search_type = 'tag') }}">{{ tag }}</a></span>
         {% endfor %}
         {% else %} 未设定{% endif %}
         </p>
@@ -23,14 +23,14 @@
         <hr>
         {% if user %}
             {% if user.admin %}
-                <a href="{{ url_for('edit_blog',article_id = article.id) }}" class="editblog">修改文章</a>
-                <a href="{{ url_for('delete_action',item_id = article.id, item_name = 'article') }}"
+                <a href="{{ url_for('admin.edit_blog',article_id = article.id) }}" class="editblog">修改文章</a>
+                <a href="{{ url_for('admin.delete_action',item_id = article.id, item_name = 'article') }}"
                    class="delete_blog">删除文章</a>
             {% endif %}
         {% endif %}
         <h4>评论</h4>
         {% if user %}
-            <form action="{{ url_for('add_comment') }}" method="post">
+            <form action="{{ url_for('main.add_comment') }}" method="post">
                 <div class="form-group">
                     <input type="text" class="form-control" name=comment_content placeholder="填写评论">
                     <input type="hidden" name="article_id" value="{{ article.id }}">
@@ -40,7 +40,7 @@
                 </div>
             </form>
         {% else %}
-            <p><a href="{{ url_for('login') }}">登陆</a>后才能评论</p>
+            <p><a href="{{ url_for('main.login') }}">登陆</a>后才能评论</p>
         {% endif %}
         {% if comments %}
             {% for comment in comments %}
@@ -51,7 +51,7 @@
                     <span>by {{ comment_author[comment.id] }}</span>
                     <span>at {{ comment.create_time }}</span>
                     {% if user %}{% if user.admin %}
-                        <a href="{{ url_for('delete_action',item_id=comment.id,item_name='comment') }}"
+                        <a href="{{ url_for('admin.delete_action',item_id=comment.id,item_name='comment') }}"
                            class="delete_comment">删除评论</a>
                     {% endif %}{% endif %}
                 </p>
@@ -62,17 +62,17 @@
                 <li>
                     <a href="
 
-                            {% if pagination.has_prev %}{{ url_for('.index',page=pagination.page - 1) }}{% else %}#{% endif %}">«</a>
+                            {% if pagination.has_prev %}{{ url_for('main.index',page=pagination.page - 1) }}{% else %}#{% endif %}">«</a>
                 </li>
                 {% for p in pagination.iter_pages() %}
                     <li>
-                        <a href="{{ url_for('.index',page=p) }}">{{ p }}</a>
+                        <a href="{{ url_for('main.index',page=p) }}">{{ p }}</a>
                     </li>
                 {% endfor %}
                 <li>
                     <a href="
 
-                            {% if pagination.has_next %}{{ url_for('.index',page=pagination.page + 1) }}{% else %}#{% endif %}">»</a>
+                            {% if pagination.has_next %}{{ url_for('main.index',page=pagination.page + 1) }}{% else %}#{% endif %}">»</a>
                 </li>
             </ul>
         </nav>

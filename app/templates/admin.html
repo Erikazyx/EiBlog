@@ -5,9 +5,9 @@
 {% block main %}
     <ul class="nav nav-tabs">
         <li role="presentation"  name="article" class="active"><a href="#">文章管理</a></li>
-        <li role="presentation"  name="article"><a href="{{ url_for('manage_comments') }}">评论管理</a></li>
-        <li role="presentation" name="user"><a href="{{ url_for('manage_users') }}">用户管理</a></li>
-        <li role="presentation" name="category"><a href="{{ url_for('manage_categorys') }}">分类管理</a></li>
+        <li role="presentation"  name="article"><a href="{{ url_for('admin.manage_comments') }}">评论管理</a></li>
+        <li role="presentation" name="user"><a href="{{ url_for('admin.manage_users') }}">用户管理</a></li>
+        <li role="presentation" name="category"><a href="{{ url_for('admin.manage_categorys') }}">分类管理</a></li>
     </ul>
     <table class="table table-striped">
                 <thead>
@@ -23,7 +23,7 @@
                 <tr>
 
                     <td>
-                        <a target="_blank" href="{{ url_for('detail',article_id = article.id) }}">{{ article.title }}/{{ article.content | truncate(50, True,'......') }}</a>
+                        <a target="_blank" href="{{ url_for('main.detail',article_id = article.id) }}">{{ article.title }}/{{ article.content | truncate(50, True,'......') }}</a>
                     </td>
                     <td>
                         <span>{{ authors[article.id] }}</span>
@@ -35,8 +35,8 @@
                         <span >{{ categorys[article.id] }}</span>
                     </td>
                     <td>
-                        <a href="{{ url_for('edit_blog',article_id = article.id) }}"><i class="glyphicon glyphicon-pencil"></i></a>
-                            <a href="{{ url_for('delete_action',item_name = 'article', item_id = article.id) }}" ><i class="glyphicon glyphicon-trash"></i></a>
+                        <a href="{{ url_for('admin.edit_blog',article_id = article.id) }}"><i class="glyphicon glyphicon-pencil"></i></a>
+                            <a href="{{ url_for('admin.delete_action',item_name = 'article', item_id = article.id) }}" ><i class="glyphicon glyphicon-trash"></i></a>
                     </td>
 
                 </tr>{% endfor %}
@@ -47,16 +47,16 @@
             <ul class="pagination">
             <li>
                 <a href="
-                        {% if pagination.has_prev %}{{ url_for('admin',page=pagination.page - 1) }}{% else %}#{% endif %}">«</a>
+                        {% if pagination.has_prev %}{{ url_for('admin.admin_page',page=pagination.page - 1) }}{% else %}#{% endif %}">«</a>
             </li>
             {% for p in pagination.iter_pages() %}
                 <li>
-                    <a href="{{ url_for('admin',page=p) }}">{{ p }}</a>
+                    <a href="{{ url_for('admin.admin_page',page=p) }}">{{ p }}</a>
                 </li>
             {% endfor %}
             <li>
                 <a href="
-                        {% if pagination.has_next %}{{ url_for('admin',page=pagination.page + 1)}}{% else %}#{% endif %}">»</a>
+                        {% if pagination.has_next %}{{ url_for('admin.admin_page',page=pagination.page + 1)}}{% else %}#{% endif %}">»</a>
             </li>
         </ul>
             </nav>

@@ -10,7 +10,7 @@
                 <li>
                     <div class="article-group">
                         <div class="article-title"><a
-                                href="{{ url_for('detail',article_id=article.id) }}"> {{ article.title }}</a></div>
+                                href="{{ url_for('main.detail',article_id=article.id) }}"> {{ article.title }}</a></div>
                         <p class="article-content">{{ article.content | safe | truncate(240, True,'.....') }}</p>
                         <div class="article-info">
                             <span class="article-author">{{ authors[article.id] }}</span>
@@ -25,16 +25,16 @@
             <ul class="pagination">
             <li>
                 <a href="
-                        {% if pagination.has_prev %}{{ url_for('search_article',page=pagination.page - 1,search_type = type_,item = item_) }}{% else %}#{% endif %}">«</a>
+                        {% if pagination.has_prev %}{{ url_for('main.search_article',page=pagination.page - 1,search_type = type_,item = item_) }}{% else %}#{% endif %}">«</a>
             </li>
             {% for p in pagination.page_list %}
                 <li>
-                    <a href="{{ url_for('search_article',page=p,search_type = type_,item = item_) }}">{{ p }}</a>
+                    <a href="{{ url_for('main.search_article',page=p,search_type = type_,item = item_) }}">{{ p }}</a>
                 </li>
             {% endfor %}
             <li>
                 <a href="
-                        {% if pagination.has_next %}{{ url_for('search_article',page=pagination.page + 1, search_type = type_,item = item_)}}{% else %}#{% endif %}">»</a>
+                        {% if pagination.has_next %}{{ url_for('main.search_article',page=pagination.page + 1, search_type = type_,item = item_)}}{% else %}#{% endif %}">»</a>
             </li>
         </ul>
             </nav>

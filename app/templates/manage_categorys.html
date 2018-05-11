@@ -4,9 +4,9 @@
 
 
     <ul class="nav nav-tabs">
-        <li role="presentation"  name="article"><a href="{{ url_for('admin') }}">文章管理</a></li>
-        <li role="presentation"  name="article"><a href="{{ url_for('manage_comments') }}">评论管理</a></li>
-        <li role="presentation" name="user"><a href="{{ url_for('manage_users') }}">用户管理</a></li>
+        <li role="presentation"  name="article"><a href="{{ url_for('admin.admin_page') }}">文章管理</a></li>
+        <li role="presentation"  name="article"><a href="{{ url_for('admin.manage_comments') }}">评论管理</a></li>
+        <li role="presentation" name="user"><a href="{{ url_for('admin.manage_users') }}">用户管理</a></li>
         <li role="presentation" class="active" name="category"><a href="#">分类管理</a></li>
     </ul>
     <table class="table table-striped">
@@ -26,7 +26,7 @@
                     <span>{{ category.id }}</span>
                 </td>
                 <td>
-                    <a href="{{ url_for('delete_action',item_name = 'category',item_id = category.id) }}"><i
+                    <a href="{{ url_for('admin.delete_action',item_name = 'category',item_id = category.id) }}"><i
                             class="glyphicon glyphicon-trash"></i></a>
                 </td>
 
