@@ -141,12 +141,13 @@ def search_article(search_type, item, *, page='1'):
 def detail(article_id):
     article = Article.query.filter(Article.id == article_id).first()
     author = User.query.filter(User.id == article.author_id).first()
-    # comments = Comment.query.filter(Comment.article_id == article_id).order_by(db.desc(Comment.id)).all()
     category = Category.query.filter(Category.id == article.category_id).first()
     comment_author = {}
     tag_list = []
     page = request.args.get('page', 1, type=int)
-    pagination = Comment.query.order_by(Comment.create_time.desc()).paginate(page, per_page=10, error_out=False)
+    comments_count = Comment.query.filter(Comment.article_id == article_id).count()
+    pagination = Comment.query.filter(Comment.article_id == article_id).order_by(Comment.create_time.desc()).paginate(
+        page, per_page=5, error_out=False)
     comments = pagination.items
     if article.tags:
         tag_list = re.split(r'\s*,\s*', article.tags)
@@ -157,6 +158,7 @@ def detail(article_id):
         'article': article,
         'author': author,
         'comments': comments,
+        'comments_count': comments_count,
         'comment_author': comment_author,
         'category': category,
         'tags': tag_list,

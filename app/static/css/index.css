@@ -18,6 +18,8 @@
 }
 
 /*.article-list li{*/
+    /*list-style: none;*/
+/*}*/
 .odd{
     border-bottom: 1px solid ;
     list-style: none;

@@ -45,7 +45,7 @@
         {% if comments %}
             {% for comment in comments %}
                 {% if loop.first %}
-                <h3>评论数：({{ loop.length }})</h3><hr>{% endif %}
+                <h3>评论数：({{ comments_count }})</h3><hr>{% endif %}
                 <h4 class="comment">{{ comment.content }}</h4>
                 <p class="comment-info">
                     <span>by {{ comment_author[comment.id] }}</span>
@@ -62,17 +62,17 @@
                 <li>
                     <a href="
 
-                            {% if pagination.has_prev %}{{ url_for('main.index',page=pagination.page - 1) }}{% else %}#{% endif %}">«</a>
+                            {% if pagination.has_prev %}{{ url_for('main.detail',page=pagination.page - 1,article_id = article.id) }}{% else %}#{% endif %}">«</a>
                 </li>
                 {% for p in pagination.iter_pages() %}
                     <li>
-                        <a href="{{ url_for('main.index',page=p) }}">{{ p }}</a>
+                        <a href="{{ url_for('main.detail',page=p,article_id = article.id) }}">{{ p }}</a>
                     </li>
                 {% endfor %}
                 <li>
                     <a href="
 
-                            {% if pagination.has_next %}{{ url_for('main.index',page=pagination.page + 1) }}{% else %}#{% endif %}">»</a>
+                            {% if pagination.has_next %}{{ url_for('main.detail',page=pagination.page + 1,article_id = article.id) }}{% else %}#{% endif %}">»</a>
                 </li>
             </ul>
         </nav>
