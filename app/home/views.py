@@ -108,7 +108,7 @@ def search_article(search_type, item, *, page='1'):
     page_index = get_page_index(page)
     if search_type == 'tag':
         articles = []
-        all_articles = Article.query.all()
+        all_articles = Article.query.order_by(db.desc(Article.id)).all()
         for article in all_articles:
             tags = re.split(r'\s*,\s*', str(article.tags))
             if item in tags:

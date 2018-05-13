@@ -27,7 +27,7 @@ def new_blog():
             T.append(tag.name)
         for tag in tag_list:
             if tag not in T:
-                db.session.add(Tag(name=tag))
+                db.session.add(Tag(name=tag,count=1))
         user_id = session.get('user_id')
         category_id = request.form.get('category_id')
         article = Article(title=title, content=content, author_id=user_id, category_id=category_id, tags=tags)
