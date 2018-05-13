@@ -91,10 +91,11 @@ def delete_action(item_id, item_name):
         tag_list = re.split(r'\s*,\s*', item.tags)
         for tag in tag_list:
             T = Tag.query.filter(Tag.name == tag).first()
-            if T.count == 1:
-                db.session.delete(T)
-            else:
-                T.count -= 1
+            if T:
+                if T.count == 1:
+                    db.session.delete(T)
+                else:
+                    T.count -= 1
         for i in comment:
             db.session.delete(i)
     elif item_name == 'user':
