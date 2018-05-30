@@ -11,7 +11,10 @@
                     <div class="article-group">
                         <div class="article-title"><a
                                 href="{{ url_for('main.detail',article_id=article.id) }}"> {{ article.title }}</a></div>
-                        <p class="article-content">{{ article.content |safe| truncate(240, True,'.....') }}</p>
+                        <p class="article-content">{% if article.content_html %}
+                            {{ article.content_html |safe| truncate(240, True,'.....') }}
+                        {% else %}
+                            {{ article.content |safe| truncate(240, True,'.....') }}{% endif %}</p>
                         <div class="article-info">
                             <span class="article-author">{{ authors[article.id] }}</span>
                             <span class="article-time">{{ article.create_time }}</span>

@@ -9,6 +9,12 @@
         <li role="presentation" name="user"><a href="{{ url_for('admin.manage_users') }}">用户管理</a></li>
         <li role="presentation" class="active" name="category"><a href="#">分类管理</a></li>
     </ul>
+            <div class="form-group">
+            <form class="category" action="{{ url_for('admin.add_category') }}" method="post">
+                <input type="text" name="category_name" class="form-control" placeholder="分类名称">
+                <input type="submit" class="category_submit" value="增加分类">
+            </form>
+        </div>
     <table class="table table-striped">
         <thead>
         <tr>

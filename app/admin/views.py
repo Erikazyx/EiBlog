@@ -4,36 +4,65 @@ from app import db
 from flask import render_template, request, redirect, url_for, session
 from app.decorators import admin_required
 from app.models import User, Article, Comment, Category, Tag
-
+from .form import ArticleForm
 from app.admin import admin
 
 
 @admin.route('/new_blog/', methods=['GET', 'POST'])
 @admin_required
 def new_blog():
+    form = ArticleForm()
+    categorys = [(c.id, c.name) for c in Category.query.all()]
+    form.category.choices = categorys
     if request.method == 'GET':
-        categorys = Category.query.all()
-        return render_template('newblog.html', categorys=categorys)
+        return render_template('markdown.html', form=form)
     else:
-        title = request.form.get('title')
-        if not title:
-            return u'标题不能为空'
-        content = request.form.get('content')
-        tags = request.form.get('tags')
-        tag_list = re.split(r'\s*,\s*', tags)
-        current_tag = Tag.query.all()
-        T = []
-        for tag in current_tag:
-            T.append(tag.name)
-        for tag in tag_list:
-            if tag not in T:
-                db.session.add(Tag(name=tag,count=1))
-        user_id = session.get('user_id')
-        category_id = request.form.get('category_id')
-        article = Article(title=title, content=content, author_id=user_id, category_id=category_id, tags=tags)
+        if form.validate_on_submit():
+            title = form.title.data
+            content = form.content.data
+            tags = form.tags.data
+            tag_list = re.split(r'\s*,\s*', tags)
+            current_tag = Tag.query.all()
+            T = []
+            for tag in current_tag:
+                T.append(tag.name)
+            for tag in tag_list:
+                if tag not in T:
+                    db.session.add(Tag(name=tag, count=1))
+            category_id = form.category.data
+            user_id = session.get('user_id')
+            article = Article(title=title, content=content, author_id=user_id,category_id=category_id, tags=tags)
+            db.session.add(article)
+            db.session.commit()
+            return redirect(url_for('main.detail', article_id=article.id))
+        else:
+            return u'error'
+
+
+@admin.route('/edit_blog/<article_id>', methods=['POST', 'GET'])
+@admin_required
+def edit_blog(article_id):
+    article = Article.query.filter(Article.id == article_id).first()
+    form = ArticleForm()
+    categorys = [(c.id, c.name) for c in Category.query.all()]
+    form.category.choices = categorys
+
+    if form.validate_on_submit():
+        categorys = [(c.id, c.name) for c in Category.query.all()]
+        form.category.choices = categorys
+
+        article.title = form.title.data
+        article.content = form.content.data
+        article.tags = form.tags.data
+        article.edit_time = datetime.utcnow()
         db.session.add(article)
         db.session.commit()
         return redirect(url_for('main.detail', article_id=article.id))
+    form.category.data = article.category_id
+    form.title.data = article.title
+    form.content.data = article.content
+    form.tags.data = article.tags
+    return render_template('markdown.html', form=form)
 
 
 @admin.route('/add_category/', methods=['POST'])
@@ -43,41 +72,7 @@ def add_category():
     category = Category(name=category_name)
     db.session.add(category)
     db.session.commit()
-    return redirect(url_for('admin.new_blog'))
-
-
-@admin.route('/edit_blog/<article_id>', methods=['POST', 'GET'])
-@admin_required
-def edit_blog(article_id):
-    if request.method == 'GET':
-        article = Article.query.filter(Article.id == article_id).first()
-        return render_template('editblog.html', article=article)
-    else:
-        article_id = request.form.get('article_id')
-        article = Article.query.filter(Article.id == article_id).first()
-        article.title = request.form.get('title')
-        if not article.title:
-            return u'标题不能为空'
-        article.content = request.form.get('content')
-        if not article.content:
-            return u'文章不能为空'
-        article.tags = request.form.get('tags')
-        tags = request.form.get('tags')
-        tag_list = re.split(r'\s*,\s*', tags)
-        current_tag = Tag.query.all()
-        T = []
-        for tag in current_tag:
-            T.append(tag.name)
-        for tag in tag_list:
-            if tag not in T:
-                db.session.add(Tag(name=tag, count=1))
-            else:
-                addTag = Tag.query.filter(Tag.name == tag).first()
-                addTag.count += 1
-        article.category_id = request.form.get('category_id')
-        article.edit_time = datetime.now()
-        db.session.commit()
-        return redirect(url_for('main.detail', article_id=article_id))
+    return redirect(url_for('admin.manage_categorys'))
 
 
 @admin.route('/delete/<item_name>/<item_id>/')
@@ -88,14 +83,15 @@ def delete_action(item_id, item_name):
     elif item_name == 'article':
         item = Article.query.filter(Article.id == item_id).first()
         comment = Comment.query.filter(Comment.article_id == item_id).all()
-        tag_list = re.split(r'\s*,\s*', item.tags)
-        for tag in tag_list:
-            T = Tag.query.filter(Tag.name == tag).first()
-            if T:
-                if T.count == 1:
-                    db.session.delete(T)
-                else:
-                    T.count -= 1
+        if item.tags:
+            tag_list = re.split(r'\s*,\s*', item.tags)
+            for tag in tag_list:
+                T = Tag.query.filter(Tag.name == tag).first()
+                if T:
+                    if T.count == 1:
+                        db.session.delete(T)
+                    else:
+                        T.count -= 1
         for i in comment:
             db.session.delete(i)
     elif item_name == 'user':

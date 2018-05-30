@@ -18,8 +18,9 @@
         {% endfor %}
         {% else %} 未设定{% endif %}
         </p>
-        <hr>
-        <p class="article-content">{{ article.content | safe }}</p>
+        <hr>{% if article.content_html %}
+        <p class="article-content">{{ article.content_html | safe }}</p>
+        {% else %}<p class="article-content">{{ article.content | safe }}</p>{% endif %}
         <hr>
         {% if user %}
             {% if user.admin %}

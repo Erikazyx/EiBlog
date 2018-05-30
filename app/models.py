@@ -1,5 +1,6 @@
 from datetime import datetime
-
+import bleach
+from markdown import markdown
 from . import db
 
 
@@ -17,11 +18,36 @@ class Article(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(50), nullable=False)
     content = db.Column(db.Text, nullable=False)
+    content_html = db.Column(db.Text)
     author_id = db.Column(db.Integer, nullable=False)
     create_time = db.Column(db.DateTime, default=datetime.now)
     category_id = db.Column(db.Integer, nullable=True)
     tags = db.Column(db.String(50), nullable=True)
     edit_time = db.Column(db.DateTime, nullable=True)
+
+    @staticmethod
+    def on_body_change(target, value, oldvalue, initiator):
+        allowed_tags = [
+            'a', 'abbr', 'acronym', 'b', 'blockquote', 'code',
+            'em', 'i', 'li', 'ol', 'pre', 'strong', 'ul',
+            'h1', 'h2', 'h3', 'p', 'img'
+        ]
+        attrs = {
+            '*': ['class'],
+            'a': ['href', 'rel'],
+            'img': ['src', 'alt']
+        }
+        target.content_html = bleach.linkify(
+            bleach.clean(
+                markdown(value, output_format='html'),
+                tags=allowed_tags,
+                attributes=attrs,
+                strip=True
+            )
+        )
+
+
+db.event.listen(Article.content, 'set', Article.on_body_change)
 
 
 class Comment(db.Model):

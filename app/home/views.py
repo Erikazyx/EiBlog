@@ -5,13 +5,8 @@ from app.decorators import login_required, Page
 from app.models import User, Article, Comment, Category
 
 from app.home import main
-
 isvalid = re.compile(r'^[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$')
 
-
-@main.route('/ping')
-def pong():
-    return 'pong'
 
 
 @main.route('/')

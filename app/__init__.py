@@ -1,10 +1,11 @@
 # encoding:utf-8
 from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
+from flask_pagedown import PageDown
 
 import config
 
-
+pagedown = PageDown()
 app = Flask(__name__)
 db = SQLAlchemy()
 
@@ -18,6 +19,7 @@ def create_app():
     from app.admin import admin as admin_blueprint
     app.register_blueprint(main_blueprint, )
     app.register_blueprint(admin_blueprint)
+    pagedown.init_app(app)
     return app
 
 
