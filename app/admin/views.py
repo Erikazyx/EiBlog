@@ -80,6 +80,10 @@ def add_category():
 def delete_action(item_id, item_name):
     if item_name == 'comment':
         item = Comment.query.filter(Comment.id == item_id).first()
+        article_id = item.article_id
+        db.session.delete(item)
+        db.session.commit()
+        return redirect(url_for('main.detail',article_id=article_id))
     elif item_name == 'article':
         item = Article.query.filter(Article.id == item_id).first()
         comment = Comment.query.filter(Comment.article_id == item_id).all()
@@ -94,6 +98,9 @@ def delete_action(item_id, item_name):
                         T.count -= 1
         for i in comment:
             db.session.delete(i)
+        db.session.delete(item)
+        db.session.commit()
+        return redirect(url_for('main.index'))
     elif item_name == 'user':
         item = User.query.filter(User.id == item_id).first()
         comment = Comment.query.filter(Comment.author_id == item_id).all()
@@ -102,15 +109,17 @@ def delete_action(item_id, item_name):
             db.session.delete(i)
         for i in comment:
             db.session.delete(i)
-
+        db.session.delete(item)
+        db.session.commit()
+        return redirect(url_for('admin.manage_users'))
     else:
         item = Category.query.filter(Category.id == item_id).first()
         article = Article.query.filter(Article.category_id == item_id).all()
         for i in article:
             i.category_id = None
-    db.session.delete(item)
-    db.session.commit()
-    return redirect(url_for('main.index'))
+        db.session.delete(item)
+        db.session.commit()
+        return redirect(url_for('admin.manage_categorys'))
 
 
 @admin.route('/admin/')

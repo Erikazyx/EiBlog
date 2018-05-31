@@ -72,11 +72,11 @@
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>
-                <p class="flash_messages">
-                {% for message in get_flashed_messages() %}
-                    {{ message }}
-                {% endfor %}
-                </p>
+{#                <p class="flash_messages">#}
+{#                {% for message in get_flashed_messages() %}#}
+{#                    {{ message }}#}
+{#                {% endfor %}#}
+{#                </p>#}
     {% block main %}{% endblock %}
 </body>
 </html>

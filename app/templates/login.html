@@ -1,23 +1,37 @@
 {% extends 'base.html' %}
 {% block title %}登陆{% endblock %}
 {% block head %}
-    <link rel="stylesheet" href="{{url_for('static',filename='css/login.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/login.css') }}">
 {% endblock %}
 {% block main %}
     <div class="main">
         <h3 class="page_title">登陆</h3>
+        {% from "_fields.html" import render_field %}
         <form action="" method="post">
+            <p class="flash_messages">
+                {% for message in get_flashed_messages() %}
+                    {{ message }}
+                {% endfor %}
+            </p>
             <div class="form_container">
+                {{ form.hidden_tag() }}
+                {{ render_field(form.email) }}
+                {{ render_field(form.password) }}
                 <div class="form-group">
-                    <label for="exampleInputEmail1">邮箱</label>
-                    <input type="email" class="form-control" name="Email" placeholder="Email">
+                    {{ form.submit(class="btn btn-default") }}
                 </div>
-                <div class="form-group">
-                    <label for="exampleInputPassword1">密码</label>
-                    <input type="password" class="form-control" name="Password" placeholder="密码">
-                </div>
-                <button type="submit" class="btn btn-default btn-block">登陆</button>
             </div>
+{#            <div class="form_container">#}
+{#                <div class="form-group">#}
+{#                    <label for="exampleInputEmail1">邮箱</label>#}
+{#                    <input type="email" class="form-control" name="Email" placeholder="Email">#}
+{#                </div>#}
+{#                <div class="form-group">#}
+{#                    <label for="exampleInputPassword1">密码</label>#}
+{#                    <input type="password" class="form-control" name="Password" placeholder="密码">#}
+{#                </div>#}
+{#                <button type="submit" class="btn btn-default btn-block">登陆</button>#}
+{#            </div>#}
         </form>
     </div>
 {% endblock %}

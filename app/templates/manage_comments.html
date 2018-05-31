@@ -36,7 +36,7 @@
                         <span >{{ article[comment.id] }}</span>
                     </td>
                     <td>
-                        <a href="{{ url_for('admin.delete_action',item_name = 'comment',item_id = article.id) }}" ><i class="glyphicon glyphicon-trash"></i></a>
+                        <a href="{{ url_for('admin.delete_action',item_name = 'comment',item_id = comment.id) }}" ><i class="glyphicon glyphicon-trash"></i></a>
                     </td>
 
                 </tr>{% endfor %}

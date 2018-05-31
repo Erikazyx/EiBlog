@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
 {% block title %}注册{% endblock %}
 {% block head %}
-    <link rel="stylesheet" href="{{url_for('static',filename='css/login.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/login.css') }}">
 {% endblock %}
 {% block main %}
     <div class="main">
         <h3 class="page_title">注册</h3>
+    {% from "_fields.html" import render_field %}
         <form action="" method="post">
             <p class="flash_messages">
                 {% for message in get_flashed_messages() %}
@@ -13,23 +14,13 @@
                 {% endfor %}
             </p>
             <div class="form_container">
+                {{ form.hidden_tag() }}
+
+                 {{ render_field(form.email) }}{{ render_field(form.username) }}{{ render_field(form.password) }}
+                {{ render_field(form.password2) }}
                 <div class="form-group">
-                    <label for="InputEmail">邮箱</label>
-                    <input type="email" class="form-control" name="Email" placeholder="Email">
+                    {{ form.submit(class="btn btn-default") }}
                 </div>
-                <div class="form-group">
-                    <label for="InputPassword">用户名</label>
-                    <input type="text" class="form-control" name="Username" placeholder="用户名">
-                </div>
-                <div class="form-group">
-                    <label for="InputPassword">密码</label>
-                    <input type="password" class="form-control" name="Password1" placeholder="密码">
-                </div>
-                <div class="form-group">
-                    <label for="InputPassword">重复密码</label>
-                    <input type="password" class="form-control" name="Password2" placeholder="重复密码">
-                </div>
-                <button type="submit" class="btn btn-default btn-block">注册</button>
             </div>
         </form>
     </div>

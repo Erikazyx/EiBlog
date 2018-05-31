@@ -3,10 +3,8 @@ from app import db
 from flask import render_template, request, redirect, url_for, session, flash
 from app.decorators import login_required, Page
 from app.models import User, Article, Comment, Category
-
+from .form import UserForm, Login
 from app.home import main
-isvalid = re.compile(r'^[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$')
-
 
 
 @main.route('/')
@@ -30,53 +28,41 @@ def index():
 
 @main.route('/login/', methods=['GET', 'POST'])
 def login():
-    if request.method == 'GET':
-        return render_template('login.html')
-    else:
-        email = request.form.get('Email')
-        password = request.form.get('Password')
+    form = Login()
+    if form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
         user = User.query.filter(User.email == email, User.password == password).first()
         if user:
             session['user_id'] = user.id
             session.permanent = True
             return redirect(url_for('main.index'))
         else:
-            return u'用户名或密码错误 请重试'
+            flash('用户名或密码错误 请重试')
+    return render_template('login.html', form=form)
 
 
 @main.route('/register/', methods=['GET', 'POST'])
 def register():
-    if request.method == 'GET':
-        return render_template('register.html')
-    else:
-        email = request.form.get('Email').lower()
-        username = request.form.get('Username')
-        password1 = request.form.get('Password1')
-        password2 = request.form.get('Password2')
-
-        if not username or not email or not password1 or not password2:
-            flash('任意项都不能为空')
-            return render_template('register.html')
-        if not isvalid.match(email):
-            flash('请输入合法的邮箱地址')
-            return render_template('register.html')
+    form = UserForm()
+    if form.validate_on_submit():
+        email = form.email.data
+        username = form.username.data
+        password = form.password.data
         user = User.query.filter(User.email == email).first()
         user_name = User.query.filter(User.username == username).first()
         if user_name:
             flash('该用户名已被使用')
-            return render_template('register.html')
+            return render_template('register.html', form=form)
         if user:
             flash('该邮箱已被注册')
-            return render_template('register.html')
-        else:
-            if password1 != password2:
-                flash('两次输入密码不同，请重试')
-                return render_template('register.html')
-            else:
-                user = User(email=email, username=username, password=password1)
-                db.session.add(user)
-                db.session.commit()
-                return redirect(url_for('main.login'))
+            return render_template('register.html', form=form)
+        user = User(email=email, username=username, password=password)
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for('main.login'))
+    else:
+        return render_template('register.html', form=form)
 
 
 @main.route('/logout/')

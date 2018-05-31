@@ -14,3 +14,8 @@ python-editor==1.0.3
 six==1.11.0
 SQLAlchemy==1.2.7
 Werkzeug==0.14.1
+Flask-WTF==0.14.2
+Flask-PageDown==0.2.2
+WTForms==2.1
+bleach==2.1.2
+Markdown==2.6.11
