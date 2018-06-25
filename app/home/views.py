@@ -1,32 +1,30 @@
 import re
 from app import db
-from flask import render_template, request, redirect, url_for, session, flash
+from flask import render_template, request, redirect, url_for, session, flash, jsonify
 from app.decorators import login_required, Page
 from app.models import User, Article, Comment, Category
-from .form import UserForm, Login
+from .form import UserForm, Login, ReplyForm
 from app.home import main
 
 
-@main.route('/')
+@main.route("/")
 def index():
     authors = {}
-    page = request.args.get('page', 1, type=int)
-    pagination = Article.query.order_by(Article.create_time.desc()).paginate(page, per_page=10, error_out=False)
+    page = request.args.get("page", 1, type=int)
+    pagination = Article.query.order_by(Article.create_time.desc()).paginate(
+        page, per_page=10, error_out=False
+    )
     articles = pagination.items
     if articles:
         for article in articles:
             author = User.query.filter(User.id == article.author_id).first().username
             authors[article.id] = author
 
-    context = {
-        'articles': articles,
-        'authors': authors,
-        'pagination': pagination,
-    }
-    return render_template('index.html', **context)
+    context = {"articles": articles, "authors": authors, "pagination": pagination}
+    return render_template("index.html", **context)
 
 
-@main.route('/login/', methods=['GET', 'POST'])
+@main.route("/login/", methods=["GET", "POST"])
 def login():
     form = Login()
     if form.validate_on_submit():
@@ -34,15 +32,15 @@ def login():
         password = form.password.data
         user = User.query.filter(User.email == email, User.password == password).first()
         if user:
-            session['user_id'] = user.id
+            session["user_id"] = user.id
             session.permanent = True
-            return redirect(url_for('main.index'))
+            return redirect(url_for("main.index"))
         else:
-            flash('用户名或密码错误 请重试')
-    return render_template('login.html', form=form)
+            flash("用户名或密码错误 请重试")
+    return render_template("login.html", form=form)
 
 
-@main.route('/register/', methods=['GET', 'POST'])
+@main.route("/register/", methods=["GET", "POST"])
 def register():
     form = UserForm()
     if form.validate_on_submit():
@@ -52,23 +50,23 @@ def register():
         user = User.query.filter(User.email == email).first()
         user_name = User.query.filter(User.username == username).first()
         if user_name:
-            flash('该用户名已被使用')
-            return render_template('register.html', form=form)
+            flash("该用户名已被使用")
+            return render_template("register.html", form=form)
         if user:
-            flash('该邮箱已被注册')
-            return render_template('register.html', form=form)
+            flash("该邮箱已被注册")
+            return render_template("register.html", form=form)
         user = User(email=email, username=username, password=password)
         db.session.add(user)
         db.session.commit()
-        return redirect(url_for('main.login'))
+        return redirect(url_for("main.login"))
     else:
-        return render_template('register.html', form=form)
+        return render_template("register.html", form=form)
 
 
-@main.route('/logout/')
+@main.route("/logout/")
 def logout():
     session.clear()
-    return redirect(url_for('main.index'))
+    return redirect(url_for("main.index"))
 
 
 def get_page_index(page_str):
@@ -82,21 +80,25 @@ def get_page_index(page_str):
     return p
 
 
-@main.route('/search_articles/<search_type>/<item>', methods=['GET'])
-def search_article(search_type, item, *, page='1'):
+@main.route("/search_articles/<search_type>/<item>", methods=["GET"])
+def search_article(search_type, item, *, page="1"):
     type_ = search_type
     item_ = item
     page_index = get_page_index(page)
-    if search_type == 'tag':
+    if search_type == "tag":
         articles = []
         all_articles = Article.query.order_by(db.desc(Article.id)).all()
         for article in all_articles:
-            tags = re.split(r'\s*,\s*', str(article.tags))
+            tags = re.split(r"\s*,\s*", str(article.tags))
             if item in tags:
                 articles.append(article)
         article_count = len(articles)
     else:
-        articles = Article.query.filter(Article.category_id == item).order_by(db.desc(Article.id)).all()
+        articles = (
+            Article.query.filter(Article.category_id == item)
+            .order_by(db.desc(Article.id))
+            .all()
+        )
         article_count = Article.query.filter(Article.category_id == item).count()
     page = Page(article_count, page_index)
     authors = {}
@@ -107,56 +109,99 @@ def search_article(search_type, item, *, page='1'):
     if article_count == 0:
         articles = []
     else:
-        articles = articles[page.offset: page.limit]
+        articles = articles[page.offset : page.limit]
     context = {
-        'articles': articles,
-        'authors': authors,
-        'type_': type_,
-        'item_': item_,
-        'pagination': page
+        "articles": articles,
+        "authors": authors,
+        "type_": type_,
+        "item_": item_,
+        "pagination": page,
     }
-    return render_template('search_article.html', **context)
+    return render_template("search_article.html", **context)
 
 
-@main.route('/detail/<article_id>/')
+@main.route("/detail/<article_id>/")
 def detail(article_id):
     article = Article.query.filter(Article.id == article_id).first()
     author = User.query.filter(User.id == article.author_id).first()
     category = Category.query.filter(Category.id == article.category_id).first()
     comment_author = {}
+    reply_dict = {}
     tag_list = []
-    page = request.args.get('page', 1, type=int)
+    reply_list = {}
+    page = request.args.get("page", 1, type=int)
     comments_count = Comment.query.filter(Comment.article_id == article_id).count()
-    pagination = Comment.query.filter(Comment.article_id == article_id).order_by(Comment.create_time.desc()).paginate(
-        page, per_page=5, error_out=False)
-    comments = pagination.items
-    if article.tags:
-        tag_list = re.split(r'\s*,\s*', article.tags)
+    comments = Comment.query.filter(Comment.article_id == article_id).order_by(
+        Comment.create_time.desc()
+    )
     if comments:
         for comment in comments:
-            comment_author[comment.id] = User.query.filter(User.id == comment.author_id).first().username
+            comment_author[comment.author_id] = (
+                User.query.filter(User.id == comment.author_id).first().username
+            )
+            if comment.parent_id:
+                reply_dict.setdefault(comment.root_id, []).append(comment.id)
+                reply_list[comment.id] = comment
+    pagination = (
+        Comment.query.filter(
+            Comment.article_id == article_id, Comment.parent_id == None
+        )
+        .order_by(db.desc(Comment.create_time))
+        .paginate(page, per_page=5, error_out=False)
+    )
+    comments = pagination.items
+    if article.tags:
+        tag_list = re.split(r"\s*,\s*", article.tags)
+
     context = {
-        'article': article,
-        'author': author,
-        'comments': comments,
-        'comments_count': comments_count,
-        'comment_author': comment_author,
-        'category': category,
-        'tags': tag_list,
-        'pagination': pagination,
+        "article": article,
+        "author": author,
+        "comments": comments,
+        "comments_count": comments_count,
+        "comment_author": comment_author,
+        "category": category,
+        "tags": tag_list,
+        "pagination": pagination,
+        "reply_dict": reply_dict,
+        "reply": reply_list,
     }
-    return render_template('detail.html', **context)
+    return render_template("detail.html", **context)
 
 
-@main.route('/add_comment/', methods=['POST'])
+@main.route("/add_comment/", methods=["POST"])
 @login_required
 def add_comment():
-    content = request.form.get('comment_content')
+    content = request.form.get("comment_content")
     if not content:
-        return u'评论不能为空'
-    article_id = request.form.get('article_id')
-    user_id = session['user_id']
+        return u"评论不能为空"
+    article_id = request.form.get("article_id")
+    user_id = session["user_id"]
     comment = Comment(content=content, article_id=article_id, author_id=user_id)
     db.session.add(comment)
     db.session.commit()
-    return redirect(url_for('main.detail', article_id=article_id))
+    return redirect(url_for("main.detail", article_id=article_id))
+
+
+@main.route("/add_reply/", methods=["POST"])
+@login_required
+def add_reply():
+    content = request.form.get("content")
+    content = content.split(":")[1] if len(content.split(":")) > 1 else content
+    reply_to = request.form.get("reply_to")
+    parent_id = request.form.get("parent")
+    root_id = request.form.get("root")
+    article_id = request.form.get("article_id")
+    if not root_id:
+        root_id = parent_id
+    author_id = session["user_id"]
+    comment = Comment(
+        content=content,
+        reply_to=reply_to,
+        parent_id=parent_id,
+        root_id=root_id,
+        author_id=author_id,
+        article_id=article_id,
+    )
+    db.session.add(comment)
+    db.session.commit()
+    return jsonify({"status": "SUCCESS"})

@@ -7,6 +7,7 @@
     <div class="main">
         <h3 class="page_title">{{ article.title }}</h3>
         <p class="article-info">
+            <input type="hidden" value="{{ article.id }}" id="article_id">
             <span>作者：{{ author.username }}</span>
             <span>时间：{{ article.create_time }}</span>
             {% if article.edit_time %}<span>修改时间：{{ article.edit_time }}</span>{% endif %}
@@ -20,7 +21,7 @@
         </p>
         <hr>{% if article.content_html %}
         <p class="article-content">{{ article.content_html | safe }}</p>
-        {% else %}<p class="article-content">{{ article.content | safe }}</p>{% endif %}
+    {% else %}<p class="article-content">{{ article.content | safe }}</p>{% endif %}
         <hr>
         {% if user %}
             {% if user.admin %}
@@ -34,7 +35,7 @@
             <form action="{{ url_for('main.add_comment') }}" method="post">
                 <div class="form-group">
                     <input type="text" class="form-control" name=comment_content placeholder="填写评论">
-                    <input type="hidden" name="article_id" value="{{ article.id }}">
+                    <input type="hidden" name="article_id" value="{{ article.id }}" class="article_id">
                 </div>
                 <div class="form-group">
                     <button class="btn btn-default">评论</button>
@@ -44,39 +45,120 @@
             <p><a href="{{ url_for('main.login') }}">登陆</a>后才能评论</p>
         {% endif %}
         {% if comments %}
-            {% for comment in comments %}
-                {% if loop.first %}
-                <h3>评论数：({{ comments_count }})</h3><hr>{% endif %}
-                <h4 class="comment">{{ comment.content }}</h4>
-                <p class="comment-info">
-                    <span>by {{ comment_author[comment.id] }}</span>
-                    <span>at {{ comment.create_time }}</span>
-                    {% if user %}{% if user.admin %}
-                        <a href="{{ url_for('admin.delete_action',item_id=comment.id,item_name='comment') }}"
-                           class="delete_comment">删除评论</a>
-                    {% endif %}{% endif %}
-                </p>
-                <hr>
-            {% endfor %}{% endif %}{% if comments %}
-        <nav style="text-align: center">
-            <ul class="pagination">
-                <li>
-                    <a href="
+            <div class="comment-show">
+                {% for comment in comments %}
+                    {% if loop.first %}
+                        <h3>评论数：({{ comments_count }})</h3>
+                        <hr>{% endif %}
+                    <h4 class="comment">{{ comment.content }}</h4>
+                    <div class="comment-info">
+                        <input type="hidden" value="{{ comment.author_id }}" class="reply_to">
+                        <input type="hidden" value="{{ comment.id }}" class="parent">
+                        by <span class="comment-author">{{ comment_author[comment.author_id] }}</span>
+                        <span class="comment-time">at {{ comment.create_time }}</span>
+                        {% if user %}<a href="javascript:;" class="pl-hf hf-con-block">回复</a>
+                            {% if user.admin %}
+                                <a href="{{ url_for('admin.delete_action',item_id=comment.id,item_name='comment') }}"
+                                   class="delete_comment">删除评论</a>
+                            {% endif %}{% endif %}
+                    </div>
 
-                            {% if pagination.has_prev %}{{ url_for('main.detail',page=pagination.page - 1,article_id = article.id) }}{% else %}#{% endif %}">«</a>
-                </li>
-                {% for p in pagination.iter_pages() %}
+                    {% if reply_dict[comment.id] %}
+                        <div class="reply_container">
+                            {% for reply_id in reply_dict[comment.id] %}
+                                <p class="reply">
+                                    回复@{{ comment_author[reply[reply_id].reply_to] }}:{{ reply[reply_id].content }}</p>
+                                <div class="comment-info">
+                                    <input type="hidden" value="{{ reply[reply_id].author_id }}" class="reply_to">
+                                    <input type="hidden" value="{{ reply_id }}" class="parent">
+                                    <input type="hidden" value="{{ reply[reply_id].root_id }}" class="root">
+                                    by<span
+                                        class="comment-author">{{ comment_author[reply[reply_id].author_id] }}</span>
+                                    <span class="comment-time">at {{ reply[reply_id].create_time }}</span>
+                                    {% if user %}<a href="javascript:" class="pl-hf hf-con-block">回复</a>
+                                        {% if user.admin %}
+                                            <a href="{{ url_for('admin.delete_action',item_id=comment.id,item_name='comment') }}"
+                                               class="delete_comment">删除评论</a>
+                                        {% endif %}{% endif %}
+                                    <br><br>
+                                </div>
+                            {% endfor %}</div>{% endif %}
+                    <hr>
+                {% endfor %}</div>{% endif %}
+        {% if comments %}
+            <nav style="text-align: center">
+                <ul class="pagination">
                     <li>
-                        <a href="{{ url_for('main.detail',page=p,article_id = article.id) }}">{{ p }}</a>
-                    </li>
-                {% endfor %}
-                <li>
-                    <a href="
+                        <a href="
 
-                            {% if pagination.has_next %}{{ url_for('main.detail',page=pagination.page + 1,article_id = article.id) }}{% else %}#{% endif %}">»</a>
-                </li>
-            </ul>
-        </nav>
-        </div>{% endif %}
+                                {% if pagination.has_prev %}{{ url_for('main.detail',page=pagination.page - 1,article_id = article.id) }}{% else %}#{% endif %}">«</a>
+                    </li>
+                    {% for p in pagination.iter_pages() %}
+                        <li>
+                            <a href="{{ url_for('main.detail',page=p,article_id = article.id) }}">{{ p }}</a>
+                        </li>
+                    {% endfor %}
+                    <li>
+                        <a href="
+
+                                {% if pagination.has_next %}{{ url_for('main.detail',page=pagination.page + 1,article_id = article.id) }}{% else %}#{% endif %}">»</a>
+                    </li>
+                </ul>
+            </nav>
+            </div>{% endif %}
+    <!--点击回复动态创建回复块-->
+    <script type="text/javascript">
+        $('.comment-show').on('click', '.pl-hf', function () {
+            //获取回复人的名字
+            var fhName = $(this).siblings('.comment-author').html();
+            //回复@
+            var fhN = '回复@' + fhName + ':';
+            var fhHtml = '<div class="hf-con "> <div class="form-group"><textarea class="content comment-input form-control hf-input" placeholder=""></textarea> </div><div class="form-group">\n' +
+                '                    <button class="btn btn-default hf-pl" >评论</button>\n</div>';
+            //显示回复
+            if ($(this).is('.hf-con-block')) {
+                $(this).parents('.comment-info').append(fhHtml);
+                $(this).removeClass('hf-con-block');
+                $('.content').html();
+                $(this).parents('.comment-info').siblings('.hf-con').find('.pre').css('padding', '6px 15px');
+                //input框自动聚焦
+                $(this).parents('.comment-info').find('.hf-con').find('.hf-input').val('').focus().val(fhN);
+            } else {
+                $(this).addClass('hf-con-block');
+                $(this).parents('.comment-info').find('.hf-con').remove();
+            }
+        });
+    </script>
+    <script>
+        $('.comment-show').on('click', '.hf-pl', function () {
+            var oHfVal = $(this).parents('.hf-con').find('.hf-input').val();
+            var oHfName = $(this).parents('.hf-con').parents('.comment-info').find('.comment-author').html();
+            var oAllVal = '回复@' + oHfName + ':';
+            if (oHfVal.replace(/^ +| +$/g, '') == '' || oHfVal == oAllVal) {
+
+            } else {
+                $.ajax({
+                    url: "/add_reply/",
+                    type: "POST",
+                    data: {
+                        content: $(this).parents('.hf-con').find('.hf-input').val(),
+                        parent: $(this).parents('.hf-con').siblings('.parent').val(),
+                        reply_to: $(this).parents('.hf-con').parents('.comment-info').find('.reply_to').val(),
+                        root: $(this).parents('.hf-con').parents('.comment-info').find('.root').val(),
+                        article_id: $('#article_id').val()
+                    },
+                    cache: false,
+                    success: function (data) {
+                        if (data['status'] == "SUCCESS") {
+                            window.location.reload();
+                        } else {
+
+                        }
+                    }
+                });
+
+            }
+        });
+    </script>
 
 {% endblock %}

@@ -1,45 +1,59 @@
 {% extends 'base.html' %}
 {% block head %}
-    <link rel="stylesheet" href="{{url_for('static',filename='css/index.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/index.css') }}">
 {% endblock %}
 {% block title %}首页{% endblock %}
 {% block main %}
-    <div class="main">
-        <ul class="article-list">
-            {% for article in articles %}
-                <li class="{{ loop.cycle('odd', 'even') }}">
-                    <div class="article-group">
-                        <div class="article-title"><a
-                                href="{{ url_for('main.detail',article_id=article.id) }}"> {{ article.title }}</a></div>
-                        <p class="article-content">{% if article.content_html %}
-                            {{ article.content_html |safe| truncate(240, True,'.....') }}
-                        {% else %}
-                            {{ article.content |safe| truncate(240, True,'.....') }}{% endif %}</p>
-                        <div class="article-info">
-                            <span class="article-author">{{ authors[article.id] }}</span>
-                            <span class="article-time">{{ article.create_time }}</span>
+    <div class="row">
+        <div class="col-md-9">
+            <ul class="article-list">
+                {% for article in articles %}
+                    <li class="{{ loop.cycle('odd', 'even') }}">
+                        <div class="article-group">
+                            <div class="article-title"><a
+                                    href="{{ url_for('main.detail',article_id=article.id) }}"> {{ article.title }}</a>
+                            </div>
+                            <p class="article-content">{% if article.content_html %}
+                                {{ article.content_html |safe| truncate(240, True,'.....') }}
+                            {% else %}
+                                {{ article.content |safe| truncate(240, True,'.....') }}{% endif %}</p>
+                            <div class="article-info">
+                                <span class="article-author">{{ authors[article.id] }}</span>
+                                <span class="article-time">{{ article.create_time }}</span>
+                            </div>
                         </div>
-                    </div>
-                </li>
-            {% endfor %}
-        </ul>
-            {% if articles %}<nav style="text-align: center">
-            <ul class="pagination">
-            <li>
-                <a href="
-                        {% if pagination.has_prev %}{{ url_for('main.index',page=pagination.page - 1) }}{% else %}#{% endif %}">«</a>
-            </li>
-            {% for p in pagination.iter_pages() %}
-                <li>
-                    <a href="{{ url_for('main.index',page=p) }}">{{ p }}</a>
-                </li>
-            {% endfor %}
-            <li>
-                <a href="
-                        {% if pagination.has_next %}{{ url_for('main.index',page=pagination.page + 1)}}{% else %}#{% endif %}">»</a>
-            </li>
-        </ul>
-            </nav>{% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+            {% if articles %}
+                <nav style="text-align: center">
+                    <ul class="pagination">
+                        <li>
+                            <a href="
+
+                                    {% if pagination.has_prev %}{{ url_for('main.index',page=pagination.page - 1) }}{% else %}#{% endif %}">«</a>
+                        </li>
+                        {% for p in pagination.iter_pages() %}
+                            <li>
+                                <a href="{{ url_for('main.index',page=p) }}">{{ p }}</a>
+                            </li>
+                        {% endfor %}
+                        <li>
+                            <a href="
+
+                                    {% if pagination.has_next %}{{ url_for('main.index',page=pagination.page + 1) }}{% else %}#{% endif %}">»</a>
+                        </li>
+                    </ul>
+                </nav>{% endif %}
+        </div>
+        <div class="col-md-2" style="margin-top:20px;padding:2px">
+            <ul style="list-style: none;font-family: 微软雅黑;background: lightgrey;padding: 2px;border-radius: 15px;">
+                <li style="text-align: center"><h3>友情链接</h3></li>
+                <li style="background: white ;margin: 2px ;padding: 10px;text-align: center;font-size:18px;"><a href="https://www.liaoxuefeng.com ">python教程</a></li>
+                <li style="background: white ;margin: 2px;padding: 10px;text-align: center;font-size:18px;border-radius: 5px;"><a href="https://github.com/erikazyx ">Github</a></li>
+            </ul>
+
+        </div>
     </div>
 
 {% endblock %}

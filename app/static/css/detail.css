@@ -1,24 +1,51 @@
-.main{
-    background:whitesmoke;
-    width:830px;
+.main {
+    background: white;
+    width: 830px;
     margin: auto;
     overflow: hidden;
     padding: 10px;
 }
 
-.article-info{
+.article-info {
     text-align: center;
     margin-top: 10px;
 }
 
-.article_tags{
+.article_tags {
     text-align: center;
 }
 
-.article_tags a{
+.article_tags a {
     color: white;
 }
 
-.comment-info{
+.comment-info {
     text-align: right;
+}
+
+.reply_container {
+    margin-left: 20px;
+    background: #e3e9f1;
+    padding-top: 5px;
+    padding-left: 5px;
+
+}
+
+.hf-con {
+    width: 100%;
+    margin-top: 10px;
+    margin-left: 24px;
+    padding-right: 40px;
+}
+
+.pull-right {
+    float: right !important;
+}
+
+.pull-left {
+    float: left !important;
+}
+
+.content {
+    float: left;
 }

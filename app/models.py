@@ -57,6 +57,9 @@ class Comment(db.Model):
     article_id = db.Column(db.Integer, nullable=False)
     author_id = db.Column(db.Integer, nullable=False)
     create_time = db.Column(db.DateTime, default=datetime.now)
+    reply_to = db.Column(db.Integer, nullable=True)#回复的那条评论的user_id
+    parent_id = db.Column(db.Integer, nullable=True)#回复的那条评论的comment_id
+    root_id = db.Column(db.Integer, nullable=True)#回复的那条评论的根评论id
 
 
 class Category(db.Model):

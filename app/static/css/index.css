@@ -7,6 +7,8 @@
 .article-title a{
     color: #995e4c;
     font-weight:900;
+    font-size:30px;
+    font-family: 微软雅黑;
 }
 
 .article-info{
@@ -17,9 +19,6 @@
     margin-right: 20px;
 }
 
-/*.article-list li{*/
-    /*list-style: none;*/
-/*}*/
 .odd{
     border-bottom: 1px solid ;
     list-style: none;
@@ -42,10 +41,4 @@
     margin: auto;
     overflow: hidden;
     padding: 10px;
-}
-.menu {
-    font:12px verdana, arial, sans-serif; /* 设置文字大小和字体样式 */
-    width:500px;
-    height:auto;
-    margin:0 auto;
 }

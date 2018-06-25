@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{{ url_for('static',filename='css/base.css') }}">
     {% block head %}{% endblock %}
 </head>
-<body>
+<body style="background-color: whitesmoke;">
     <nav class="navbar navbar-default">
         <div class="container-fluid">
             <!-- Brand and toggle get grouped for better mobile display -->
@@ -72,11 +72,6 @@
             </div><!-- /.navbar-collapse -->
         </div><!-- /.container-fluid -->
     </nav>
-{#                <p class="flash_messages">#}
-{#                {% for message in get_flashed_messages() %}#}
-{#                    {{ message }}#}
-{#                {% endfor %}#}
-{#                </p>#}
     {% block main %}{% endblock %}
 </body>
 </html>
