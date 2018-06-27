@@ -18,7 +18,7 @@
                             {% else %}
                                 {{ article.content |safe| truncate(240, True,'.....') }}{% endif %}</p>
                             <div class="article-info">
-                                <span class="article-author">{{ authors[article.id] }}</span>
+                                <span class="article-author">{{ authors[article.author_id] }}</span>
                                 <span class="article-time">{{ article.create_time }}</span>
                             </div>
                         </div>

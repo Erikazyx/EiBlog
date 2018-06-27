@@ -17,8 +17,10 @@ def create_app():
     db.init_app(app)
     from app.home import main as main_blueprint
     from app.admin import admin as admin_blueprint
+    from app.auth import auth as auth_blueprint
     app.register_blueprint(main_blueprint, )
     app.register_blueprint(admin_blueprint)
+    app.register_blueprint(auth_blueprint)
     pagedown.init_app(app)
     return app
 

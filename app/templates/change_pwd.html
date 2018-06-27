@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
-{% block title %}登陆{% endblock %}
+{% block title %}修改密码{% endblock %}
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static',filename='css/login.css') }}">
 {% endblock %}
 {% block main %}
     <div class="main">
-        <h3 class="page_title">登陆</h3>
+        <h3 class="page_title">修改密码</h3>
         {% from "_fields.html" import render_field %}
         <form action="" method="post">
             <p class="flash_messages">
@@ -15,8 +15,9 @@
             </p>
             <div class="form_container">
                 {{ form.hidden_tag() }}
-                {{ render_field(form.email) }}
-                {{ render_field(form.password) }}
+                {{ render_field(form.old_password) }}
+                {{ render_field(form.password1) }}
+                {{ render_field(form.password2) }}
                 <div class="form-group">
                     {{ form.submit(class="btn btn-default") }}
                 </div>

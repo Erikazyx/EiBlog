@@ -32,7 +32,7 @@
                     <span>{{ category.id }}</span>
                 </td>
                 <td>
-                    <a href="{{ url_for('admin.delete_action',item_name = 'category',item_id = category.id) }}"><i
+                    <a href="{{ url_for('admin.delete_category',category_id = category.id) }}"><i
                             class="glyphicon glyphicon-trash"></i></a>
                 </td>
 

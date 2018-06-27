@@ -26,7 +26,7 @@
         {% if user %}
             {% if user.admin %}
                 <a href="{{ url_for('admin.edit_blog',article_id = article.id) }}" class="editblog">修改文章</a>
-                <a href="{{ url_for('admin.delete_action',item_id = article.id, item_name = 'article') }}"
+                <a href="{{ url_for('admin.delete_article',article_id = article.id) }}"
                    class="delete_blog">删除文章</a>
             {% endif %}
         {% endif %}
@@ -58,8 +58,8 @@
                         <span class="comment-time">at {{ comment.create_time }}</span>
                         {% if user %}<a href="javascript:;" class="pl-hf hf-con-block">回复</a>
                             {% if user.admin %}
-                                <a href="{{ url_for('admin.delete_action',item_id=comment.id,item_name='comment') }}"
-                                   class="delete_comment">删除评论</a>
+                                <a href="{{ url_for('admin.delete_comment',comment_id=comment.id) }}"
+                                               class="delete_comment">删除评论</a>
                             {% endif %}{% endif %}
                     </div>
 
@@ -77,7 +77,7 @@
                                     <span class="comment-time">at {{ reply[reply_id].create_time }}</span>
                                     {% if user %}<a href="javascript:" class="pl-hf hf-con-block">回复</a>
                                         {% if user.admin %}
-                                            <a href="{{ url_for('admin.delete_action',item_id=comment.id,item_name='comment') }}"
+                                            <a href="{{ url_for('admin.delete_comment',comment_id=reply_id) }}"
                                                class="delete_comment">删除评论</a>
                                         {% endif %}{% endif %}
                                     <br><br>
@@ -119,8 +119,6 @@
             if ($(this).is('.hf-con-block')) {
                 $(this).parents('.comment-info').append(fhHtml);
                 $(this).removeClass('hf-con-block');
-                $('.content').html();
-                $(this).parents('.comment-info').siblings('.hf-con').find('.pre').css('padding', '6px 15px');
                 //input框自动聚焦
                 $(this).parents('.comment-info').find('.hf-con').find('.hf-input').val('').focus().val(fhN);
             } else {
@@ -141,7 +139,7 @@
                     url: "/add_reply/",
                     type: "POST",
                     data: {
-                        content: $(this).parents('.hf-con').find('.hf-input').val(),
+                        content: oHfVal,
                         parent: $(this).parents('.hf-con').siblings('.parent').val(),
                         reply_to: $(this).parents('.hf-con').parents('.comment-info').find('.reply_to').val(),
                         root: $(this).parents('.hf-con').parents('.comment-info').find('.root').val(),

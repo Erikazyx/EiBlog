@@ -27,16 +27,16 @@
                         <a target="_blank" href="{{ url_for('main.detail',article_id = comment.article_id) }}">{{ comment.content | truncate(50, True,'.....') }}</a>
                     </td>
                     <td>
-                        <span>{{ authors[comment.id] }}</span>
+                        <span>{{ author[comment.author_id] }}</span>
                     </td>
                     <td>
                         <span >{{ comment.create_time }}</span>
                     </td>
                     <td>
-                        <span >{{ article[comment.id] }}</span>
+                        <span >{{ article[comment.article_id] }}</span>
                     </td>
                     <td>
-                        <a href="{{ url_for('admin.delete_action',item_name = 'comment',item_id = comment.id) }}" ><i class="glyphicon glyphicon-trash"></i></a>
+                        <a href="{{ url_for('admin.delete_comment',comment_id = comment.id) }}" ><i class="glyphicon glyphicon-trash"></i></a>
                     </td>
 
                 </tr>{% endfor %}

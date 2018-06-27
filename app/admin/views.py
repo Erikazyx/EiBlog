@@ -1,7 +1,7 @@
 import re
 from datetime import datetime
 from app import db
-from flask import render_template, request, redirect, url_for, session
+from flask import render_template, request, redirect, url_for, session, flash
 from app.decorators import admin_required
 from app.models import User, Article, Comment, Category, Tag
 from .form import ArticleForm
@@ -14,29 +14,25 @@ def new_blog():
     form = ArticleForm()
     categorys = [(c.id, c.name) for c in Category.query.all()]
     form.category.choices = categorys
-    if request.method == 'GET':
-        return render_template('markdown.html', form=form)
-    else:
-        if form.validate_on_submit():
-            title = form.title.data
-            content = form.content.data
-            tags = form.tags.data
-            tag_list = re.split(r'\s*,\s*', tags)
-            current_tag = Tag.query.all()
-            T = []
-            for tag in current_tag:
-                T.append(tag.name)
-            for tag in tag_list:
-                if tag not in T:
-                    db.session.add(Tag(name=tag, count=1))
-            category_id = form.category.data
-            user_id = session.get('user_id')
-            article = Article(title=title, content=content, author_id=user_id,category_id=category_id, tags=tags)
-            db.session.add(article)
-            db.session.commit()
-            return redirect(url_for('main.detail', article_id=article.id))
-        else:
-            return u'error'
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+        tags = form.tags.data
+        tag_list = re.split(r'\s*,\s*', tags)
+        current_tag = Tag.query.all()
+        T = []
+        for tag in current_tag:
+            T.append(tag.name)
+        for tag in tag_list:
+            if tag not in T:
+                db.session.add(Tag(name=tag, count=1))
+        category_id = form.category.data
+        user_id = session.get('user_id')
+        article = Article(title=title, content=content, author_id=user_id, category_id=category_id, tags=tags)
+        db.session.add(article)
+        db.session.commit()
+        return redirect(url_for('main.detail', article_id=article.id))
+    return render_template('markdown.html', form=form)
 
 
 @admin.route('/edit_blog/<article_id>', methods=['POST', 'GET'])
@@ -46,7 +42,6 @@ def edit_blog(article_id):
     form = ArticleForm()
     categorys = [(c.id, c.name) for c in Category.query.all()]
     form.category.choices = categorys
-
     if form.validate_on_submit():
         categorys = [(c.id, c.name) for c in Category.query.all()]
         form.category.choices = categorys
@@ -75,51 +70,83 @@ def add_category():
     return redirect(url_for('admin.manage_categorys'))
 
 
-@admin.route('/delete/<item_name>/<item_id>/')
+@admin.route('/del_comment/<comment_id>/')
 @admin_required
-def delete_action(item_id, item_name):
-    if item_name == 'comment':
-        item = Comment.query.filter(Comment.id == item_id).first()
-        article_id = item.article_id
-        db.session.delete(item)
-        db.session.commit()
-        return redirect(url_for('main.detail',article_id=article_id))
-    elif item_name == 'article':
-        item = Article.query.filter(Article.id == item_id).first()
-        comment = Comment.query.filter(Comment.article_id == item_id).all()
-        if item.tags:
-            tag_list = re.split(r'\s*,\s*', item.tags)
-            for tag in tag_list:
-                T = Tag.query.filter(Tag.name == tag).first()
-                if T:
-                    if T.count == 1:
-                        db.session.delete(T)
-                    else:
-                        T.count -= 1
-        for i in comment:
+def delete_comment(comment_id):
+    del_comment = Comment.query.filter(Comment.id == comment_id).first()
+    if del_comment:
+        child = Comment.query.filter(Comment.root_id == comment_id).all()
+        article_id = del_comment.article_id
+        for i in child:
             db.session.delete(i)
-        db.session.delete(item)
+        db.session.delete(del_comment)
         db.session.commit()
-        return redirect(url_for('main.index'))
-    elif item_name == 'user':
-        item = User.query.filter(User.id == item_id).first()
-        comment = Comment.query.filter(Comment.author_id == item_id).all()
-        article = Article.query.filter(Article.author_id == item_id).all()
-        for i in article:
-            db.session.delete(i)
-        for i in comment:
-            db.session.delete(i)
-        db.session.delete(item)
-        db.session.commit()
-        return redirect(url_for('admin.manage_users'))
     else:
-        item = Category.query.filter(Category.id == item_id).first()
-        article = Article.query.filter(Article.category_id == item_id).all()
+        flash('非法操作')
+        return redirect(url_for('main.index'))
+    return redirect(url_for('main.detail', article_id=article_id))
+
+
+@admin.route('/del_article/<article_id>/')
+@admin_required
+def delete_article(article_id):
+    article = Article.query.filter(Article.id == article_id).first()
+    if article:
+        comments = Comment.query.filter(Comment.article_id == article_id).all()
+        if article.tags:
+            del_tag(article.tags)
+        for single_comment in comments:
+            delete_comment(single_comment.id)
+        db.session.delete(article)
+        db.session.commit()
+    else:
+        flash('非法操作')
+    return redirect(url_for('main.index'))
+
+
+def del_tag(tag):
+    tag_list = re.split(r'\s*,\s*', tag)
+    for tag in tag_list:
+        T = Tag.query.filter(Tag.name == tag).first()
+        if T and T.count == 1:
+            db.session.delete(T)
+        else:
+            T.count -= 1
+
+
+@admin.route('/del_user/<user_id>/')
+@admin_required
+def delete_user(user_id):
+    user = User.query.filter(User.id == user_id).first()
+    if user:
+        comments = Comment.query.filter(Comment.author_id == user_id).all()
+        articles = Article.query.filter(Article.author_id == user_id).all()
+        if articles:
+            for i in articles:
+                delete_article(i.id)
+        if comments:
+            for i in comments:
+                delete_comment(i.id)
+        db.session.delete(user)
+        db.session.commit()
+    else:
+        flash('非法操作')
+    return redirect(url_for('admin.manage_users'))
+
+
+@admin.route('/del_category/<category_id>/')
+@admin_required
+def delete_category(category_id):
+    category = Category.query.filter(Category.id == category_id).first()
+    if category:
+        article = Article.query.filter(Article.category_id == category_id).all()
         for i in article:
             i.category_id = None
-        db.session.delete(item)
+        db.session.delete(category)
         db.session.commit()
-        return redirect(url_for('admin.manage_categorys'))
+    else:
+        flash('非法操作')
+    return redirect(url_for('admin.manage_categorys'))
 
 
 @admin.route('/admin/')
@@ -138,8 +165,8 @@ def admin_page():
                 category_name = Category.query.filter(Category.id == article.category_id).first().name
             else:
                 category_name = '未分类'
-            authors[article.id] = author
-            category[article.id] = category_name
+            authors[article.author_id] = author
+            category[article.category_id] = category_name
 
     context = {
         'articles': articles,
@@ -147,7 +174,7 @@ def admin_page():
         'pagination': pagination,
         'categorys': category
     }
-    return render_template('admin.html', **context)
+    return render_template('admin/admin.html', **context)
 
 
 @admin.route('/manage_comments/')
@@ -160,9 +187,9 @@ def manage_comments():
     comments = pagination.items
     if comments:
         for comment in comments:
-            author[comment.id] = User.query.filter(User.id == Comment.author_id).first().username
-            article[comment.id] = Article.query.filter(Article.id == Comment.article_id).first().title
-    return render_template('manage_comments.html', comments=comments, authors=author,
+            author[comment.author_id] = User.query.filter(User.id == comment.author_id).first().username
+            article[comment.article_id] = Article.query.filter(Article.id == Comment.article_id).first().title
+    return render_template('admin/manage_comments.html', comments=comments, author=author,
                            article=article, pagination=pagination)
 
 
@@ -172,14 +199,11 @@ def manage_users():
     page = request.args.get('page', 1, type=int)
     pagination = User.query.paginate(page, per_page=20, error_out=False)
     users = pagination.items
-    return render_template('manage_users.html', users=users, pagination=pagination)
+    return render_template('admin/manage_users.html', users=users, pagination=pagination)
 
 
 @admin.route('/manage_categorys/')
 @admin_required
 def manage_categorys():
     categorys = Category.query.all()
-    return render_template('manage_categorys.html', categorys=categorys)
-
-
-
+    return render_template('admin/manage_categorys.html', categorys=categorys)

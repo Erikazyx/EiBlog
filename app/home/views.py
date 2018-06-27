@@ -1,9 +1,8 @@
 import re
 from app import db
-from flask import render_template, request, redirect, url_for, session, flash, jsonify
+from flask import render_template, request, redirect, url_for, session, jsonify
 from app.decorators import login_required, Page
 from app.models import User, Article, Comment, Category
-from .form import UserForm, Login, ReplyForm
 from app.home import main
 
 
@@ -18,55 +17,10 @@ def index():
     if articles:
         for article in articles:
             author = User.query.filter(User.id == article.author_id).first().username
-            authors[article.id] = author
+            authors[article.author_id] = author
 
     context = {"articles": articles, "authors": authors, "pagination": pagination}
     return render_template("index.html", **context)
-
-
-@main.route("/login/", methods=["GET", "POST"])
-def login():
-    form = Login()
-    if form.validate_on_submit():
-        email = form.email.data
-        password = form.password.data
-        user = User.query.filter(User.email == email, User.password == password).first()
-        if user:
-            session["user_id"] = user.id
-            session.permanent = True
-            return redirect(url_for("main.index"))
-        else:
-            flash("用户名或密码错误 请重试")
-    return render_template("login.html", form=form)
-
-
-@main.route("/register/", methods=["GET", "POST"])
-def register():
-    form = UserForm()
-    if form.validate_on_submit():
-        email = form.email.data
-        username = form.username.data
-        password = form.password.data
-        user = User.query.filter(User.email == email).first()
-        user_name = User.query.filter(User.username == username).first()
-        if user_name:
-            flash("该用户名已被使用")
-            return render_template("register.html", form=form)
-        if user:
-            flash("该邮箱已被注册")
-            return render_template("register.html", form=form)
-        user = User(email=email, username=username, password=password)
-        db.session.add(user)
-        db.session.commit()
-        return redirect(url_for("main.login"))
-    else:
-        return render_template("register.html", form=form)
-
-
-@main.route("/logout/")
-def logout():
-    session.clear()
-    return redirect(url_for("main.index"))
 
 
 def get_page_index(page_str):
@@ -191,6 +145,8 @@ def add_reply():
     parent_id = request.form.get("parent")
     root_id = request.form.get("root")
     article_id = request.form.get("article_id")
+    message = request.form.get('message')
+    print(message)
     if not root_id:
         root_id = parent_id
     author_id = session["user_id"]

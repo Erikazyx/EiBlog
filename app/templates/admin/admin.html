@@ -26,17 +26,17 @@
                         <a target="_blank" href="{{ url_for('main.detail',article_id = article.id) }}">{{ article.title }}/{{ article.content | truncate(50, True,'......') }}</a>
                     </td>
                     <td>
-                        <span>{{ authors[article.id] }}</span>
+                        <span>{{ authors[article.author_id] }}</span>
                     </td>
                     <td>
                         <span >{{ article.create_time }}</span>
                     </td>
                     <td>
-                        <span >{{ categorys[article.id] }}</span>
+                        <span >{{ categorys[article.category_id] }}</span>
                     </td>
                     <td>
                         <a href="{{ url_for('admin.edit_blog',article_id = article.id) }}"><i class="glyphicon glyphicon-pencil"></i></a>
-                            <a href="{{ url_for('admin.delete_action',item_name = 'article', item_id = article.id) }}" ><i class="glyphicon glyphicon-trash"></i></a>
+                            <a href="{{ url_for('admin.delete_article',article_id = article.id) }}" ><i class="glyphicon glyphicon-trash"></i></a>
                     </td>
 
                 </tr>{% endfor %}
