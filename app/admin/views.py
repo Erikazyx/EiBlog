@@ -72,10 +72,13 @@ def add_category():
 
 @admin.route('/del_comment/<comment_id>/')
 @admin_required
-def delete_comment(comment_id):
+def delete_comment(comment_id, *, n='null'):
     del_comment = Comment.query.filter(Comment.id == comment_id).first()
     if del_comment:
-        child = Comment.query.filter(Comment.root_id == comment_id).all()
+        if n == 'all':
+            child = Comment.query.filter((Comment.root_id == comment_id) | (Comment.parent_id == comment_id)).all()
+        else:
+            child = Comment.query.filter(Comment.root_id == comment_id).all()
         article_id = del_comment.article_id
         for i in child:
             db.session.delete(i)
@@ -126,7 +129,7 @@ def delete_user(user_id):
                 delete_article(i.id)
         if comments:
             for i in comments:
-                delete_comment(i.id)
+                delete_comment(i.id, n='all')
         db.session.delete(user)
         db.session.commit()
     else:

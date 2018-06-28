@@ -63,21 +63,21 @@
                             {% endif %}{% endif %}
                     </div>
 
-                    {% if reply_dict[comment.id] %}
+                    {% if reply[comment.id] %}
                         <div class="reply_container">
-                            {% for reply_id in reply_dict[comment.id] %}
+                            {% for reply in reply[comment.id] %}
                                 <p class="reply">
-                                    回复@{{ comment_author[reply[reply_id].reply_to] }}:{{ reply[reply_id].content }}</p>
+                                    回复@{{ comment_author[reply.reply_to] }}:{{ reply.content }}</p>
                                 <div class="comment-info">
-                                    <input type="hidden" value="{{ reply[reply_id].author_id }}" class="reply_to">
-                                    <input type="hidden" value="{{ reply_id }}" class="parent">
-                                    <input type="hidden" value="{{ reply[reply_id].root_id }}" class="root">
+                                    <input type="hidden" value="{{ reply.author_id }}" class="reply_to">
+                                    <input type="hidden" value="{{ reply.id }}" class="parent">
+                                    <input type="hidden" value="{{ reply.root_id }}" class="root">
                                     by<span
-                                        class="comment-author">{{ comment_author[reply[reply_id].author_id] }}</span>
-                                    <span class="comment-time">at {{ reply[reply_id].create_time }}</span>
+                                        class="comment-author">{{ comment_author[reply.author_id] }}</span>
+                                    <span class="comment-time">at {{ reply.create_time }}</span>
                                     {% if user %}<a href="javascript:" class="pl-hf hf-con-block">回复</a>
                                         {% if user.admin %}
-                                            <a href="{{ url_for('admin.delete_comment',comment_id=reply_id) }}"
+                                            <a href="{{ url_for('admin.delete_comment',comment_id=reply.id) }}"
                                                class="delete_comment">删除评论</a>
                                         {% endif %}{% endif %}
                                     <br><br>

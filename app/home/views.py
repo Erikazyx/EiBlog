@@ -59,7 +59,7 @@ def search_article(search_type, item, *, page="1"):
     if articles:
         for article in articles:
             author = User.query.filter(User.id == article.author_id).first().username
-            authors[article.id] = author
+            authors[author.id] = author
     if article_count == 0:
         articles = []
     else:
@@ -82,20 +82,8 @@ def detail(article_id):
     comment_author = {}
     reply_dict = {}
     tag_list = []
-    reply_list = {}
     page = request.args.get("page", 1, type=int)
     comments_count = Comment.query.filter(Comment.article_id == article_id).count()
-    comments = Comment.query.filter(Comment.article_id == article_id).order_by(
-        Comment.create_time.desc()
-    )
-    if comments:
-        for comment in comments:
-            comment_author[comment.author_id] = (
-                User.query.filter(User.id == comment.author_id).first().username
-            )
-            if comment.parent_id:
-                reply_dict.setdefault(comment.root_id, []).append(comment.id)
-                reply_list[comment.id] = comment
     pagination = (
         Comment.query.filter(
             Comment.article_id == article_id, Comment.parent_id == None
@@ -103,6 +91,15 @@ def detail(article_id):
         .order_by(db.desc(Comment.create_time))
         .paginate(page, per_page=5, error_out=False)
     )
+    for item in pagination.items:
+        comment_author[item.author_id] = (
+            User.query.filter(User.id == item.author_id).first().username
+        )
+        reply_dict[item.id] = (
+            Comment.query.filter(Comment.root_id == item.id)
+            .order_by(Comment.create_time.desc())
+            .all()
+        )
     comments = pagination.items
     if article.tags:
         tag_list = re.split(r"\s*,\s*", article.tags)
@@ -116,8 +113,7 @@ def detail(article_id):
         "category": category,
         "tags": tag_list,
         "pagination": pagination,
-        "reply_dict": reply_dict,
-        "reply": reply_list,
+        "reply": reply_dict,
     }
     return render_template("detail.html", **context)
 
@@ -145,8 +141,6 @@ def add_reply():
     parent_id = request.form.get("parent")
     root_id = request.form.get("root")
     article_id = request.form.get("article_id")
-    message = request.form.get('message')
-    print(message)
     if not root_id:
         root_id = parent_id
     author_id = session["user_id"]

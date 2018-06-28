@@ -26,7 +26,7 @@ def login():
 
 @auth.route("/register/", methods=["GET", "POST"])
 def register():
-    if session['user_id']:
+    if session.get('user_id'):
         return redirect(url_for('main.index'))
     form = UserForm()
     if form.validate_on_submit():
